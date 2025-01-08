@@ -1,0 +1,47 @@
+/* Ensure the map container takes up 70% of the width */
+#map {
+    width: 70%;
+    height: 100vh;  /* Full viewport height */
+    float: left;
+}
+
+/* Sidebar (right column) containing the waypoints and actions */
+#sidebar {
+    width: 30%;
+    height: 100vh;  /* Full viewport height */
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #f4f4f4;
+    float: left;
+}
+
+/* Style the waypoints list */
+#waypointsList {
+    margin-top: 20px;
+}
+
+#waypointsList strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+#waypointsList div {
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#waypointsList div:hover {
+    background-color: #eaeaea;
+}
+
+/* Ensure that the map and sidebar don't overlap */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+}
