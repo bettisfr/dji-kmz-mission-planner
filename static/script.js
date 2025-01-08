@@ -82,6 +82,27 @@ function addWaypoint(latLng) {
     });
 }
 
+// Function to send the updated waypoint data to the server
+function updateWaypoint(waypoint) {
+    fetch('/update_waypoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypoint.waypoint_id,
+            lat: waypoint.lat,
+            lon: waypoint.lon
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Waypoint updated on server:', data);
+    })
+    .catch(error => {
+        console.error('Error updating waypoint on server:', error);
+    });
+}
 
 // Function to initialize the mission visualization (called on page load or mission update)
 function visualizeMission(data) {
@@ -201,27 +222,7 @@ function updateWaypointInSidebar(waypoint) {
     }
 }
 
-// Function to send the updated waypoint data to the server
-function updateWaypoint(waypoint) {
-    fetch('/update_waypoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypoint.waypoint_id,
-            lat: waypoint.lat,
-            lon: waypoint.lon
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Waypoint updated on server:', data);
-    })
-    .catch(error => {
-        console.error('Error updating waypoint on server:', error);
-    });
-}
+
 
 // Function to add the waypoint to the sidebar
 function addWaypointToSidebar(waypoint) {

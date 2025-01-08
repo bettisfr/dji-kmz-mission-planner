@@ -2,12 +2,10 @@ from typing import List, Optional
 
 
 class Action:
-    """Represents an action performed at a waypoint."""
-
     def __init__(self, action_type: str, action_id: int, **kwargs):
         self.action_type = action_type  # e.g., 'takePhoto', 'focus', etc.
         self.action_id = action_id
-        self.parameters = kwargs  # Sub-fields for the action
+        self.parameters = kwargs
 
     def to_dict(self):
         return {
@@ -18,13 +16,11 @@ class Action:
 
 
 class Waypoint:
-    """Represents a waypoint in the mission."""
-
     def __init__(self, waypoint_id: int, lat: float, lon: float):
         self.waypoint_id = waypoint_id
         self.lat = lat
         self.lon = lon
-        self.actions: List[Action] = []  # List of actions for this waypoint
+        self.actions: List[Action] = []
 
     def add_action(self, action: Action):
         self.actions.append(action)
@@ -39,14 +35,11 @@ class Waypoint:
 
 
 class Mission:
-    """Represents a drone mission."""
-
     def __init__(self, height: float, speed: float, payload_position_index: int):
         self.height = height
         self.speed = speed
         self.payload_position_index = payload_position_index
-        self.waypoints: List[Waypoint] = []  # List of waypoints in the mission
-
+        self.waypoints: List[Waypoint] = []
 
     def add_waypoint(self, waypoint: Waypoint):
         self.waypoints.append(waypoint)
@@ -100,8 +93,3 @@ def create_mock_mission():
     mission.add_waypoint(wp2)
 
     return mission
-
-if __name__ == "__main__":
-    mission = create_mock_mission()
-
-    print_mission(mission)

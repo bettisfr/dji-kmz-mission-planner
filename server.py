@@ -5,9 +5,11 @@ app = Flask(__name__)
 
 mission = create_mock_mission()
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/load_mission')
 def load_mission():
@@ -28,7 +30,6 @@ def update_waypoint():
 
     print_mission(mission)
 
-    # Return a success response
     return jsonify({"status": "success", "message": f"Waypoint {waypoint_id} updated successfully"}), 200
 
 
@@ -45,7 +46,6 @@ def add_waypoint():
 
     print_mission(mission)
 
-    # Return a success response
     return jsonify({"status": "success", "message": f"Waypoint {next_id} added successfully"}), 200
 
 
