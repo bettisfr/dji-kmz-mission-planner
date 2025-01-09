@@ -1,11 +1,12 @@
 // Global variables
-let map; // Reference to the Google Map
-let polyline; // Reference to the polyline connecting waypoints
+let map;
+let polyline;
+let markers = [];
 
 // Dynamically load Google Maps API script without callback in URL
 function loadGoogleMapsAPI() {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=weekly`; // Removed callback
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=weekly`;
     script.async = true;
     script.defer = true;
     script.onload = initMap; // Manually call initMap after the script loads
@@ -19,20 +20,20 @@ loadGoogleMapsAPI();
 function initMap() {
     console.log("Initializing Google Map...");
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 43.062715, lng: 12.551034 }, // Custom starting location
+        center: { lat: 43.062715, lng: 12.551034 },
         zoom: 18,
-        mapTypeId: google.maps.MapTypeId.SATELLITE, // Set map type to satellite
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
         styles: [
             {
                 "elementType": "labels",
-                "stylers": [{ "visibility": "off" }] // Hide labels on the map
+                "stylers": [{ "visibility": "off" }]
             }
         ]
     });
 
     // Add click listener to the map
     map.addListener("click", function (event) {
-        addWaypoint(event.latLng); // Call addWaypoint with the clicked location
+        addWaypoint(event.latLng);
     });
 
     // Load the current mission from the server
@@ -45,8 +46,7 @@ function loadMission() {
     fetch('/load_mission')
         .then(response => response.json())
         .then(data => {
-            // Visualize the mission on the map
-            visualizeMission(data);
+            renderMissionToMap(data);
         })
         .catch(error => console.error('Error loading mission:', error));
 }
@@ -104,12 +104,17 @@ function updateWaypoint(waypoint) {
     });
 }
 
-// Function to initialize the mission visualization (called on page load or mission update)
-function visualizeMission(data) {
+// Function to initialize the mission visualization
+function renderMissionToMap(data) {
     const waypointsList = document.getElementById('waypointsList');
     waypointsList.innerHTML = '<strong>Waypoints</strong>'; // Clear existing text
 
     const polylinePath = [];
+
+    for (var i = 0; i < markers.length; i++ ) {
+        markers[i].setMap(null);
+    }
+    markers.length = 0;
 
     // Loop through each waypoint and add a marker to the map
     data.waypoints.forEach(waypoint => {
@@ -143,20 +148,11 @@ function addWaypointMarker(waypoint) {
         map: map,
         title: `Waypoint ${waypoint.waypoint_id}`,
         label: `${waypoint.waypoint_id}`,
-        labelOrigin: new google.maps.Point(0, 0), // Optional: Adjust label position
-        draggable: true  // Make the marker draggable
+        labelOrigin: new google.maps.Point(0, 0),
+        draggable: true
     });
 
-    // Add an info window for each marker
-    const infoWindow = new google.maps.InfoWindow({
-        content: `<h3>Waypoint ${waypoint.waypoint_id}</h3>
-                  <p>Latitude: ${waypoint.lat}</p>
-                  <p>Longitude: ${waypoint.lon}</p>`
-    });
-
-    marker.addListener('click', () => {
-        infoWindow.open(map, marker);
-    });
+    markers.push(marker);
 
     // Listen for the marker being dragged and update the waypoint position
     marker.addListener('dragend', (event) => {
