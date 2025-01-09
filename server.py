@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify, request
-from mission import create_mock_mission, print_mission, Waypoint
+from mission import create_mock_mission, print_mission, Waypoint, Action
 
 app = Flask(__name__)
 
@@ -67,6 +67,19 @@ def remove_waypoint():
 
     return jsonify({"status": "success", "message": f"Waypoint removed successfully"}), 200
 
+
+@app.route('/add_action', methods=['POST'])
+def add_action():
+    data = request.get_json()
+    waypoint_id = data.get('waypoint_id')
+
+    action = Action("focus", focusX=0.5, focusY=0.5)
+    mission.add_action(waypoint_id, action)
+    print(f"Adding action to waypoint {waypoint_id}")
+
+    print_mission(mission)
+
+    return jsonify({"status": "success", "message": f"Action added successfully"}), 200
 
 @app.route('/remove_action', methods=['POST'])
 def remove_action():

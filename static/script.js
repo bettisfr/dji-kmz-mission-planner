@@ -123,6 +123,31 @@ function removeWaypoint(waypointId) {
     });
 }
 
+function addAction(waypointId) {
+    fetch('/add_action', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypointId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to add action on server.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data.message);
+        getMission();
+    })
+    .catch(error => {
+        console.error('Error adding action:', error);
+    });
+}
+
 function removeAction(waypointId, actionId) {
     fetch('/remove_action', {
         method: 'POST',
@@ -191,7 +216,7 @@ function addWaypointMarker(waypoint) {
     const marker = new google.maps.Marker({
         position: { lat: waypoint.lat, lng: waypoint.lon },
         map: map,
-        title: `Waypoint ${waypoint.waypoint_id}`,
+        title: `WP ${waypoint.waypoint_id}: ${waypoint.actions.length} actions`,
         label: `${waypoint.waypoint_id}`,
         labelOrigin: new google.maps.Point(0, 0),
         draggable: true
@@ -218,7 +243,7 @@ function addWaypointToSidebar(waypoint) {
     waypointElement.id = `waypoint-${waypoint.waypoint_id}`;
     const lat_fixed = waypoint.lat.toFixed(6);
     const lon_fixed = waypoint.lon.toFixed(6);
-    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: (${lat_fixed}, ${lon_fixed})</b> <b><a href="#" class="remove-waypoint">remove</a></b>`;
+    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: (${lat_fixed}, ${lon_fixed})</b> <b><a href="#" class="remove-waypoint">del</a></b>`;
 
     // Add listener for showing a popup when removing a waypoint
     waypointElement.querySelector('.remove-waypoint').addEventListener('click', (e) => {
@@ -229,20 +254,19 @@ function addWaypointToSidebar(waypoint) {
     // Create a section to list actions for the waypoint
     const actionsList = document.createElement('div');
     actionsList.classList.add('actions-list');
-    actionsList.innerHTML = '<b>Actions</b> <b><a href="#" class="add-action">add</a></b>';
+    actionsList.innerHTML = '<u><b>Actions</b></u> <b><a href="#" class="add-action">add</a></b>';
 
     // Listener for adding a new action
     actionsList.querySelector('.add-action').addEventListener('click', (e) => {
         e.stopPropagation();
-        alert(`You clicked to add a new action for waypoint ${waypoint.waypoint_id}.`);
-        // Logic to handle new action creation is up to you
+        addAction(waypoint.waypoint_id);
     });
 
     // Populate the list of actions
     waypoint.actions.forEach(action => {
         const actionElement = document.createElement('div');
         actionElement.id = `action-${action.action_id}`;
-        actionElement.innerHTML = `${action.action_id}: ${action.action_type} <b><a href="#" class="remove-action">remove</a></b>`;
+        actionElement.innerHTML = `<b>${action.action_id} - ${action.action_type}</b> <b><a href="#" class="remove-action">del</a></b>`;
 
         // Listener for removing an action
         actionElement.querySelector('.remove-action').addEventListener('click', (e) => {
@@ -253,11 +277,12 @@ function addWaypointToSidebar(waypoint) {
         const parametersList = document.createElement('div');
         for (const [param, value] of Object.entries(action.parameters)) {
             const paramElement = document.createElement('div');
-            paramElement.style.display = 'flex'; // Use flexbox for layout
+            paramElement.style.display = 'flex';
 
             const label = document.createElement('span');
             label.textContent = `${param}: `;
             label.style.flex = '1';
+            label.style.fontStyle = 'italic';
 
             const input = document.createElement('input');
             input.type = 'text';
