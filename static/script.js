@@ -163,12 +163,11 @@ function addWaypointMarker(waypoint) {
     });
 }
 
-// Function to add the waypoint to the sidebar
 function addWaypointToSidebar(waypoint) {
     const waypointsList = document.getElementById('waypointsList');
     const waypointElement = document.createElement('div');
     waypointElement.id = `waypoint-${waypoint.waypoint_id}`;
-    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: ${waypoint.lat}, ${waypoint.lon}</b> remove`;
+    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: ${waypoint.lat}, ${waypoint.lon}</b> <b><a href="#" class="remove-waypoint">remove</a></b>`;
 
     // On-click event to open the info window for this waypoint
     waypointElement.onclick = () => {
@@ -180,15 +179,37 @@ function addWaypointToSidebar(waypoint) {
         infoWindow.open(map);
     };
 
+    // Add listener for showing a popup when removing a waypoint
+    waypointElement.querySelector('.remove-waypoint').addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent triggering the waypoint onclick event
+        alert(`You clicked to remove waypoint ${waypoint.waypoint_id}.`);
+        // Logic to handle removal is up to you
+    });
+
     // Create a section to list actions for the waypoint
     const actionsList = document.createElement('div');
     actionsList.classList.add('actions-list');
-    actionsList.innerHTML = '<b>Actions</b> <b>add</b>';
+    actionsList.innerHTML = '<b>Actions</b> <b><a href="#" class="add-action">add</a></b>';
 
+    // Listener for adding a new action
+    actionsList.querySelector('.add-action').addEventListener('click', (e) => {
+        e.stopPropagation();
+        alert(`You clicked to add a new action for waypoint ${waypoint.waypoint_id}.`);
+        // Logic to handle new action creation is up to you
+    });
+
+    // Populate the list of actions
     waypoint.actions.forEach(action => {
         const actionElement = document.createElement('div');
         actionElement.id = `action-${action.action_id}`;
-        actionElement.innerHTML = `${action.action_id}: ${action.action_type} <b>remove</b>`;
+        actionElement.innerHTML = `${action.action_id}: ${action.action_type} <b><a href="#" class="remove-action">remove</a></b>`;
+
+        // Listener for removing an action
+        actionElement.querySelector('.remove-action').addEventListener('click', (e) => {
+            e.stopPropagation();
+            alert(`You clicked to remove action ${action.action_id} for waypoint ${waypoint.waypoint_id}.`);
+            // Logic to handle removal is up to you
+        });
 
         const parametersList = document.createElement('div');
         for (const [param, value] of Object.entries(action.parameters)) {
@@ -198,9 +219,12 @@ function addWaypointToSidebar(waypoint) {
         }
 
         actionElement.appendChild(parametersList);
+
         actionsList.appendChild(actionElement);
     });
 
     waypointElement.appendChild(actionsList);
     waypointsList.appendChild(waypointElement);
 }
+
+

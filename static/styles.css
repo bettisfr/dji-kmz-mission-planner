@@ -47,6 +47,42 @@ div[id^="action-"] {
   padding-top: 5px;
 }
 
+.actions-list {
+    margin-top: 10px;
+    padding-left: 15px;
+}
+
+.action-item {
+    margin-bottom: 5px;
+    padding-left: 10px;
+    border-left: 2px solid #ccc;
+}
+
+/* Add green style */
+.add-action {
+    color: green;
+    text-decoration: none; /* Remove underline */
+    padding-left: 10px; /* Add left padding */
+    font-weight: bold;
+}
+
+/* Remove red style */
+.remove-action, .remove-waypoint {
+    color: red;
+    text-decoration: none; /* Remove underline */
+    padding-left: 10px; /* Add left padding */
+    font-weight: bold;
+}
+
+/* Optional: Add hover effects */
+.add-action:hover {
+    text-decoration: underline;
+}
+
+.remove-action:hover, .remove-waypoint:hover {
+    text-decoration: underline;
+}
+
 /* Ensure that the map and sidebar don't overlap */
 body {
     margin: 0;
