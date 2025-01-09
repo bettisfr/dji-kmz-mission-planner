@@ -4,7 +4,11 @@ from mission import create_mock_mission, print_mission, Waypoint
 app = Flask(__name__)
 
 mission = create_mock_mission()
-
+# print_mission(mission)
+# mission.remove_waypoint(1)
+# print_mission(mission)
+# mission.remove_action(1, 2)
+# print_mission(mission)
 
 @app.route('/')
 def index():
@@ -40,7 +44,7 @@ def add_waypoint():
     lon = data.get('lon')
 
     next_id = len(mission.waypoints)
-    wp_new = Waypoint(waypoint_id=next_id, lat=lat, lon=lon)
+    wp_new = Waypoint(lat=lat, lon=lon)
     mission.add_waypoint(wp_new)
     print(f"Creating new waypoint {wp_new} with new coordinates: {lat}, {lon}")
 
