@@ -50,7 +50,6 @@ function getMission() {
         .catch(error => console.error('Error loading mission:', error));
 }
 
-// Function to handle adding a new waypoint when clicking on the map
 function addWaypoint(latLng) {
     const lat = latLng.lat();
     const lon = latLng.lng();
@@ -77,7 +76,6 @@ function addWaypoint(latLng) {
     });
 }
 
-// Function to send the updated waypoint data to the server
 function updateWaypoint(waypoint) {
     fetch('/update_waypoint', {
         method: 'POST',
@@ -97,6 +95,57 @@ function updateWaypoint(waypoint) {
     })
     .catch(error => {
         console.error('Error updating waypoint on server:', error);
+    });
+}
+
+function removeWaypoint(waypointId) {
+    fetch('/remove_waypoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypointId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to remove waypoint on server.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data.message);
+        getMission();
+    })
+    .catch(error => {
+        console.error('Error removing waypoint:', error);
+    });
+}
+
+function removeAction(waypointId, actionId) {
+    fetch('/remove_action', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypointId,
+            action_id: actionId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to remove action on server.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data.message);
+        getMission();
+    })
+    .catch(error => {
+        console.error('Error removing action:', error);
     });
 }
 
@@ -174,8 +223,7 @@ function addWaypointToSidebar(waypoint) {
     // Add listener for showing a popup when removing a waypoint
     waypointElement.querySelector('.remove-waypoint').addEventListener('click', (e) => {
         e.stopPropagation(); // Prevent triggering the waypoint onclick event
-        alert(`You clicked to remove waypoint ${waypoint.waypoint_id}.`);
-        // Logic to handle removal is up to you
+        removeWaypoint(waypoint.waypoint_id);
     });
 
     // Create a section to list actions for the waypoint
@@ -199,8 +247,7 @@ function addWaypointToSidebar(waypoint) {
         // Listener for removing an action
         actionElement.querySelector('.remove-action').addEventListener('click', (e) => {
             e.stopPropagation();
-            alert(`You clicked to remove action ${action.action_id} for waypoint ${waypoint.waypoint_id}.`);
-            // Logic to handle removal is up to you
+            removeAction(waypoint.waypoint_id, action.action_id);
         });
 
         const parametersList = document.createElement('div');

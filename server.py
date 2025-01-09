@@ -21,6 +21,24 @@ def load_mission():
     return jsonify(mission.to_dict())
 
 
+
+
+
+@app.route('/add_waypoint', methods=['POST'])
+def add_waypoint():
+    data = request.get_json()
+    lat = data.get('lat')
+    lon = data.get('lon')
+
+    wp_new = Waypoint(lat=lat, lon=lon)
+    mission.add_waypoint(wp_new)
+    print(f"Creating new waypoint {wp_new} with new coordinates: {lat}, {lon}")
+
+    print_mission(mission)
+
+    return jsonify({"status": "success", "message": f"Waypoint added successfully"}), 200
+
+
 @app.route('/update_waypoint', methods=['POST'])
 def update_waypoint():
     data = request.get_json()
@@ -34,23 +52,35 @@ def update_waypoint():
 
     print_mission(mission)
 
-    return jsonify({"status": "success", "message": f"Waypoint {waypoint_id} updated successfully"}), 200
+    return jsonify({"status": "success", "message": f"Waypoint updated successfully"}), 200
 
 
-@app.route('/add_waypoint', methods=['POST'])
-def add_waypoint():
+@app.route('/remove_waypoint', methods=['POST'])
+def remove_waypoint():
     data = request.get_json()
-    lat = data.get('lat')
-    lon = data.get('lon')
+    waypoint_id = data.get('waypoint_id')
 
-    next_id = len(mission.waypoints)
-    wp_new = Waypoint(lat=lat, lon=lon)
-    mission.add_waypoint(wp_new)
-    print(f"Creating new waypoint {wp_new} with new coordinates: {lat}, {lon}")
+    mission.remove_waypoint(waypoint_id)
+    print(f"Removing waypoint {waypoint_id}")
 
     print_mission(mission)
 
-    return jsonify({"status": "success", "message": f"Waypoint {next_id} added successfully"}), 200
+    return jsonify({"status": "success", "message": f"Waypoint removed successfully"}), 200
+
+
+@app.route('/remove_action', methods=['POST'])
+def remove_action():
+    data = request.get_json()
+    waypoint_id = data.get('waypoint_id')
+    action_id = data.get('action_id')
+
+    mission.remove_action(waypoint_id, action_id)
+    print(f"Removing action {waypoint_id} - {action_id}")
+
+    print_mission(mission)
+
+    return jsonify({"status": "success", "message": f"Waypoint removed successfully"}), 200
+
 
 
 if __name__ == '__main__':
