@@ -76,6 +76,10 @@ function getAvailableActions(waypointId) {
                             }
                         });
 
+                        if (!selectedAction) {
+                            return;
+                        }
+
                         addAction(waypointId, selectedAction, params);
 
                         // Close the dialog after adding the action
@@ -118,7 +122,7 @@ function populateActionSelect() {
 function updateParameters() {
     const selectedAction = document.getElementById('actionSelect').value;
     if (!selectedAction) {
-        return; // If no action is selected, don't do anything
+        return;
     }
 
     const parameters = availableActions[selectedAction]?.parameters || [];
@@ -138,7 +142,6 @@ function updateParameters() {
         const input = document.createElement('input');
         input.type = 'text';
         input.name = param;
-        // input.placeholder = `Enter ${param}`;
 
         inputGroup.appendChild(label);
         inputGroup.appendChild(input);
