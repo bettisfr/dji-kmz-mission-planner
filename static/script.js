@@ -167,17 +167,9 @@ function addWaypointToSidebar(waypoint) {
     const waypointsList = document.getElementById('waypointsList');
     const waypointElement = document.createElement('div');
     waypointElement.id = `waypoint-${waypoint.waypoint_id}`;
-    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: ${waypoint.lat}, ${waypoint.lon}</b> <b><a href="#" class="remove-waypoint">remove</a></b>`;
-
-    // On-click event to open the info window for this waypoint
-    waypointElement.onclick = () => {
-        const infoWindow = new google.maps.InfoWindow({
-            content: `<b>Waypoint ${waypoint.waypoint_id}</b>
-                      <p>Latitude: ${waypoint.lat}</p>
-                      <p>Longitude: ${waypoint.lon}</p>`
-        });
-        infoWindow.open(map);
-    };
+    const lat_fixed = waypoint.lat.toFixed(6);
+    const lon_fixed = waypoint.lon.toFixed(6);
+    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: (${lat_fixed}, ${lon_fixed})</b> <b><a href="#" class="remove-waypoint">remove</a></b>`;
 
     // Add listener for showing a popup when removing a waypoint
     waypointElement.querySelector('.remove-waypoint').addEventListener('click', (e) => {
@@ -214,12 +206,24 @@ function addWaypointToSidebar(waypoint) {
         const parametersList = document.createElement('div');
         for (const [param, value] of Object.entries(action.parameters)) {
             const paramElement = document.createElement('div');
-            paramElement.innerHTML = `${param}: ${value}`;
+            paramElement.style.display = 'flex'; // Use flexbox for layout
+
+            const label = document.createElement('span');
+            label.textContent = `${param}: `;
+            label.style.flex = '1';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            input.classList.add('parameter-input');
+
+            paramElement.appendChild(label);
+            paramElement.appendChild(input);
+
             parametersList.appendChild(paramElement);
         }
 
         actionElement.appendChild(parametersList);
-
         actionsList.appendChild(actionElement);
     });
 

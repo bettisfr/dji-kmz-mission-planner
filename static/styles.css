@@ -1,13 +1,13 @@
 /* Ensure the map container takes up 70% of the width */
 #map {
-    width: 75%;
+    width: 80%;
     height: 95vh;
     float: left;
 }
 
 /* Sidebar (right column) containing the waypoints and actions */
 #sidebar {
-    width: 25%;
+    width: 20%;
     height: 95vh;
     padding: 10px;
     overflow-y: auto;
@@ -81,6 +81,13 @@ div[id^="action-"] {
 
 .remove-action:hover, .remove-waypoint:hover {
     text-decoration: underline;
+}
+
+.parameter-input {
+    width: 40%;
+    box-sizing: border-box;
+    float: right;
+    text-align: left;
 }
 
 /* Ensure that the map and sidebar don't overlap */
