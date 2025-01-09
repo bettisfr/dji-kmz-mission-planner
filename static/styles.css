@@ -1,14 +1,14 @@
 /* Ensure the map container takes up 70% of the width */
 #map {
     width: 75%;
-    height: 95vh;  /* Full viewport height */
+    height: 95vh;
     float: left;
 }
 
 /* Sidebar (right column) containing the waypoints and actions */
 #sidebar {
     width: 25%;
-    height: 95vh;  /* Full viewport height */
+    height: 95vh;
     padding: 10px;
     overflow-y: auto;
     background-color: #f4f4f4;
@@ -27,15 +27,24 @@
 }
 
 #waypointsList div {
-    margin-bottom: 10px;
-    padding: 5px;
-    border: 1px solid #ccc;
     border-radius: 5px;
-    cursor: pointer;
 }
 
 #waypointsList div:hover {
     background-color: #eaeaea;
+}
+
+.waypoint-coordinates {
+    border: 1px solid #ccc;
+}
+
+div[id^="waypoint-"] {
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+div[id^="action-"] {
+  padding-top: 5px;
 }
 
 /* Ensure that the map and sidebar don't overlap */

@@ -167,8 +167,8 @@ function addWaypointMarker(waypoint) {
 function addWaypointToSidebar(waypoint) {
     const waypointsList = document.getElementById('waypointsList');
     const waypointElement = document.createElement('div');
-    waypointElement.id = `waypoint-${waypoint.waypoint_id}`; // Add an ID for this waypoint
-    waypointElement.innerHTML = `<strong>Waypoint ${waypoint.waypoint_id}: <span class="waypoint-coordinates">${waypoint.lat}, ${waypoint.lon}</span></strong>`;
+    waypointElement.id = `waypoint-${waypoint.waypoint_id}`;
+    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: ${waypoint.lat}, ${waypoint.lon}</b> remove`;
 
     // On-click event to open the info window for this waypoint
     waypointElement.onclick = () => {
@@ -183,11 +183,12 @@ function addWaypointToSidebar(waypoint) {
     // Create a section to list actions for the waypoint
     const actionsList = document.createElement('div');
     actionsList.classList.add('actions-list');
-    actionsList.innerHTML = '<strong>Actions</strong>';
+    actionsList.innerHTML = '<b>Actions</b> <b>add</b>';
 
     waypoint.actions.forEach(action => {
         const actionElement = document.createElement('div');
-        actionElement.innerHTML = `Action ${action.action_id}: ${action.action_type}`;
+        actionElement.id = `action-${action.action_id}`;
+        actionElement.innerHTML = `${action.action_id}: ${action.action_type} <b>remove</b>`;
 
         const parametersList = document.createElement('div');
         for (const [param, value] of Object.entries(action.parameters)) {
