@@ -37,12 +37,11 @@ function initMap() {
     });
 
     // Load the current mission from the server
-    loadMission();
+    getMission();
 }
 
-
 // Function to load the mission data from the Flask server
-function loadMission() {
+function getMission() {
     fetch('/load_mission')
         .then(response => response.json())
         .then(data => {
@@ -53,11 +52,9 @@ function loadMission() {
 
 // Function to handle adding a new waypoint when clicking on the map
 function addWaypoint(latLng) {
-    // Extract latitude and longitude from the clicked location
     const lat = latLng.lat();
     const lon = latLng.lng();
 
-    // Send the new waypoint's coordinates to the server
     fetch('/add_waypoint', {
         method: 'POST',
         headers: {
@@ -72,10 +69,8 @@ function addWaypoint(latLng) {
         return response.json();
     })
     .then(data => {
-        console.log(data.message); // Log success message from the server
-
-        // After adding the waypoint on the server, reload the mission to visualize it
-        loadMission(); // This function will update the map with the new waypoint
+        console.log(data.message);
+        getMission();
     })
     .catch(error => {
         console.error('Error adding waypoint:', error);
@@ -98,6 +93,7 @@ function updateWaypoint(waypoint) {
     .then(response => response.json())
     .then(data => {
         console.log('Waypoint updated on server:', data);
+        getMission();
     })
     .catch(error => {
         console.error('Error updating waypoint on server:', error);
@@ -163,62 +159,9 @@ function addWaypointMarker(waypoint) {
         waypoint.lat = newLat;
         waypoint.lon = newLng;
 
-        // Update the waypoint details in the sidebar
-        updateWaypointInSidebar(waypoint);
-
-        // Send the updated coordinates to the server
         updateWaypoint(waypoint);
-
-        // Update the polyline path dynamically
-        updatePolylinePath();
     });
 }
-
-// Function to update the polyline path dynamically
-function updatePolylinePath() {
-    // Gather the latest waypoint positions
-    const waypoints = [];
-    document.querySelectorAll('[id^="waypoint-"]').forEach(element => {
-        const id = parseInt(element.id.replace('waypoint-', ''), 10);
-        const coordsText = element.querySelector('.waypoint-coordinates').textContent;
-        const [lat, lon] = coordsText.split(',').map(coord => parseFloat(coord.trim()));
-        waypoints.push({ waypoint_id: id, lat, lon });
-    });
-
-    // Update the polyline's path
-    const newPath = waypoints.map(wp => ({ lat: wp.lat, lng: wp.lon }));
-    if (polyline) {
-        polyline.setPath(newPath);
-    }
-}
-
-// Function to update the waypoint in the sidebar
-function updateWaypointInSidebar(waypoint) {
-    const waypointElement = document.getElementById(`waypoint-${waypoint.waypoint_id}`);
-    waypointElement.querySelector('.waypoint-coordinates').textContent = `${waypoint.lat}, ${waypoint.lon}`;
-
-    // Update the actions section with the updated details if needed
-    const actionsList = waypointElement.querySelector('.actions-list');
-    if (actionsList) {
-        actionsList.innerHTML = ''; // Clear existing actions
-        waypoint.actions.forEach(action => {
-            const actionElement = document.createElement('div');
-            actionElement.innerHTML = `Action ${action.action_id}: ${action.action_type}`;
-
-            const parametersList = document.createElement('div');
-            for (const [param, value] of Object.entries(action.parameters)) {
-                const paramElement = document.createElement('div');
-                paramElement.innerHTML = `${param}: ${value}`;
-                parametersList.appendChild(paramElement);
-            }
-
-            actionElement.appendChild(parametersList);
-            actionsList.appendChild(actionElement);
-        });
-    }
-}
-
-
 
 // Function to add the waypoint to the sidebar
 function addWaypointToSidebar(waypoint) {
