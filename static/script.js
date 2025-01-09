@@ -2,6 +2,7 @@
 let map;
 let polyline;
 let markers = [];
+let availableActions = {};
 
 // Dynamically load Google Maps API script without callback in URL
 function loadGoogleMapsAPI() {
@@ -20,13 +21,13 @@ loadGoogleMapsAPI();
 function initMap() {
     console.log("Initializing Google Map...");
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 43.062715, lng: 12.551034 },
+        center: {lat: 43.062715, lng: 12.551034},
         zoom: 18,
         mapTypeId: google.maps.MapTypeId.SATELLITE,
         styles: [
             {
                 "elementType": "labels",
-                "stylers": [{ "visibility": "off" }]
+                "stylers": [{"visibility": "off"}]
             }
         ]
     });
@@ -40,7 +41,6 @@ function initMap() {
     getMission();
 }
 
-// Function to load the mission data from the Flask server
 function getMission() {
     fetch('/load_mission')
         .then(response => response.json())
@@ -48,6 +48,102 @@ function getMission() {
             renderMissionToMap(data);
         })
         .catch(error => console.error('Error loading mission:', error));
+}
+
+function getAvailableActions(waypointId) {
+    fetch('/available_actions')
+        .then(response => response.json())
+        .then(data => {
+            availableActions = data;
+            populateActionSelect(data);
+            // Open the popup modal using jQuery UI
+            $("#popup").dialog({
+                modal: true,
+                width: "30%",
+                height: "auto",
+                buttons: {
+                    "Add": function() {
+                        // Handle the "Add" button click here
+                        const selectedAction = document.getElementById('actionSelect').value;
+                        const parameters = availableActions[selectedAction]?.parameters || [];
+                        const params = {};
+
+                        // Collect the values of the parameters
+                        parameters.forEach(param => {
+                            const input = document.querySelector(`[name=${param}]`);
+                            if (input) {
+                                params[param] = input.value;
+                            }
+                        });
+
+                        addAction(waypointId, selectedAction, params);
+
+                        // Close the dialog after adding the action
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error retrieving available actions:', error);
+        });
+}
+
+// Function to populate the select dropdown with action options
+function populateActionSelect() {
+    const actionSelect = document.getElementById('actionSelect');
+    actionSelect.innerHTML = ''; // Clear any existing options
+
+    // Add a default "Select an action" option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select an action';
+    actionSelect.appendChild(defaultOption);
+
+    // Add the action options dynamically
+    for (const action in availableActions) {
+        if (availableActions.hasOwnProperty(action)) {
+            const option = document.createElement('option');
+            option.value = action;
+            option.textContent = action;
+            actionSelect.appendChild(option);
+        }
+    }
+
+    // Update parameters for the first action (if any)
+    updateParameters();
+}
+
+// Function to update the parameters based on the selected action
+function updateParameters() {
+    const selectedAction = document.getElementById('actionSelect').value;
+    if (!selectedAction) {
+        return; // If no action is selected, don't do anything
+    }
+
+    const parameters = availableActions[selectedAction]?.parameters || [];
+    const container = document.getElementById('parametersContainer');
+
+    // Clear existing parameters
+    container.innerHTML = '';
+
+    // Dynamically add input fields for each parameter
+    parameters.forEach(param => {
+        const inputGroup = document.createElement('div');
+        inputGroup.classList.add('form-group');
+
+        const label = document.createElement('label');
+        label.textContent = param;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = param;
+        // input.placeholder = `Enter ${param}`;
+
+        inputGroup.appendChild(label);
+        inputGroup.appendChild(input);
+        container.appendChild(inputGroup);
+    });
 }
 
 function addWaypoint(latLng) {
@@ -59,21 +155,21 @@ function addWaypoint(latLng) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ lat, lon })
+        body: JSON.stringify({lat, lon})
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to add waypoint on server.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data.message);
-        getMission();
-    })
-    .catch(error => {
-        console.error('Error adding waypoint:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to add waypoint on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error adding waypoint:', error);
+        });
 }
 
 function updateWaypoint(waypoint) {
@@ -88,14 +184,14 @@ function updateWaypoint(waypoint) {
             lon: waypoint.lon
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Waypoint updated on server:', data);
-        getMission();
-    })
-    .catch(error => {
-        console.error('Error updating waypoint on server:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            console.log('Waypoint updated on server:', data);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error updating waypoint on server:', error);
+        });
 }
 
 function removeWaypoint(waypointId) {
@@ -108,44 +204,46 @@ function removeWaypoint(waypointId) {
             waypoint_id: waypointId
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to remove waypoint on server.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data.message);
-        getMission();
-    })
-    .catch(error => {
-        console.error('Error removing waypoint:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to remove waypoint on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error removing waypoint:', error);
+        });
 }
 
-function addAction(waypointId) {
+function addAction(waypointId, actionType, parameters) {
     fetch('/add_action', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            waypoint_id: waypointId
+            waypoint_id: waypointId,
+            action_type: actionType,
+            parameters: parameters
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to add action on server.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data.message);
-        getMission();
-    })
-    .catch(error => {
-        console.error('Error adding action:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to add action on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error adding action:', error);
+        });
 }
 
 function removeAction(waypointId, actionId) {
@@ -159,19 +257,19 @@ function removeAction(waypointId, actionId) {
             action_id: actionId
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to remove action on server.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data.message);
-        getMission();
-    })
-    .catch(error => {
-        console.error('Error removing action:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to remove action on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error removing action:', error);
+        });
 }
 
 // Function to initialize the mission visualization
@@ -181,7 +279,7 @@ function renderMissionToMap(data) {
 
     const polylinePath = [];
 
-    for (var i = 0; i < markers.length; i++ ) {
+    for (var i = 0; i < markers.length; i++) {
         markers[i].setMap(null);
     }
     markers.length = 0;
@@ -189,7 +287,7 @@ function renderMissionToMap(data) {
     // Loop through each waypoint and add a marker to the map
     data.waypoints.forEach(waypoint => {
         addWaypointMarker(waypoint);
-        polylinePath.push({ lat: waypoint.lat, lng: waypoint.lon });
+        polylinePath.push({lat: waypoint.lat, lng: waypoint.lon});
         addWaypointToSidebar(waypoint);
     });
 
@@ -214,7 +312,7 @@ function renderMissionToMap(data) {
 // Function to add a waypoint marker to the map
 function addWaypointMarker(waypoint) {
     const marker = new google.maps.Marker({
-        position: { lat: waypoint.lat, lng: waypoint.lon },
+        position: {lat: waypoint.lat, lng: waypoint.lon},
         map: map,
         title: `WP ${waypoint.waypoint_id}: ${waypoint.actions.length} actions`,
         label: `${waypoint.waypoint_id}`,
@@ -259,7 +357,7 @@ function addWaypointToSidebar(waypoint) {
     // Listener for adding a new action
     actionsList.querySelector('.add-action').addEventListener('click', (e) => {
         e.stopPropagation();
-        addAction(waypoint.waypoint_id);
+        getAvailableActions(waypoint.waypoint_id);
     });
 
     // Populate the list of actions

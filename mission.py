@@ -1,5 +1,24 @@
 from typing import List, Optional
 
+ACTIONS = {
+    "takePhoto": {
+        "parameters": ["fileSuffix"]
+    },
+    "focus": {
+        "parameters": ["focusX", "focusY"]
+    },
+    "zoom": {
+        "parameters": ["focalLength"]
+    },
+    "gimbalRotate": {
+        "parameters": ["gimbalRotateMode", "gimbalPitchRotateEnable", "gimbalPitchRotateAngle",
+                       "gimbalYawRotateEnable", "gimbalYawRotateAngle"]
+    },
+    "rotateYaw": {
+        "parameters": ["aircraftHeading"]
+    }
+}
+
 
 class Action:
     def __init__(self, action_type: str, **kwargs):
