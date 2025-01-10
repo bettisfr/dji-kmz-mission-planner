@@ -1,21 +1,27 @@
 import os
+import shutil
 from lxml import etree
 from mission import create_mock_mission
 
 
-# Function to prettify and write XML
 def write_pretty_xml(element, file_path):
-    # Convert element to a pretty-printed XML string
     pretty_xml = etree.tostring(
         element, pretty_print=True, xml_declaration=True, encoding='UTF-8'
     )
-    # Write to the specified file
     with open(file_path, 'wb') as file:
         file.write(pretty_xml)
 
 
-def mission_to_kmz(mission):
-    output_folder = 'wpmz'
+def create_kmz(mission_name, folder_to_zip):
+    output_folder = "out"
+    kmz_filename = f"{mission_name}.kmz"
+    shutil.make_archive(mission_name, 'zip', folder_to_zip)
+    shutil.move(f"{mission_name}.zip", kmz_filename)
+    shutil.move(kmz_filename, os.path.join(output_folder, kmz_filename))
+
+
+def mission_to_kmz(mission, mission_name):
+    wpmz_folder = 'out/wpmz'
     template_file = 'template.kml'
     waylines_file = 'waylines.wpml'
 
@@ -26,12 +32,12 @@ def mission_to_kmz(mission):
     }
 
     # Ensure the output folder exists
-    os.makedirs(output_folder, exist_ok=True)
+    os.makedirs(wpmz_folder, exist_ok=True)
 
     # Create "template.kml"
     kml_template = etree.Element('kml', nsmap=namespaces)
     document_template = etree.SubElement(kml_template, 'Document')
-    write_pretty_xml(kml_template, os.path.join(output_folder, template_file))
+    write_pretty_xml(kml_template, os.path.join(wpmz_folder, template_file))
 
     # Create "waylines.wpml"
     kml_waylines = etree.Element('kml', nsmap=namespaces)
@@ -69,11 +75,11 @@ def mission_to_kmz(mission):
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}distance").text = '284.281188964844'  # To be computed
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}duration").text = '69.7450637817383'  # To be computed
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}autoFlightSpeed").text = '5'
-
-    # Add <Placemark>
-    placemark = etree.SubElement(folder, 'Placemark')
     
     for waypoint in mission.waypoints:
+        # Add <Placemark>
+        placemark = etree.SubElement(folder, 'Placemark')
+
         # Add <Point>
         point = etree.SubElement(placemark, 'Point')
         coordinates = etree.SubElement(point, 'coordinates')
@@ -114,10 +120,11 @@ def mission_to_kmz(mission):
             for param, value in action.parameters.items():
                 etree.SubElement(action_actuator_func_param, f"{{{namespaces['wpml']}}}{param}").text = str(value)
     
-    write_pretty_xml(kml_waylines, os.path.join(output_folder, waylines_file))
+    write_pretty_xml(kml_waylines, os.path.join(wpmz_folder, waylines_file))
+    create_kmz(mission_name, wpmz_folder)
 
 
 if __name__ == '__main__':
     mission = create_mock_mission()
-    mission_to_kmz(mission)
+    mission_to_kmz(mission, "azz")
     
