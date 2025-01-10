@@ -50,48 +50,7 @@ function getMission() {
         .catch(error => console.error('Error loading mission:', error));
 }
 
-function getAvailableActions(waypointId) {
-    fetch('/available_actions')
-        .then(response => response.json())
-        .then(data => {
-            availableActions = data;
-            populateActionSelect(data);
-            // Open the popup modal using jQuery UI
-            $("#popup").dialog({
-                modal: true,
-                width: "30%",
-                height: "auto",
-                buttons: {
-                    "Add": function() {
-                        // Handle the "Add" button click here
-                        const selectedAction = document.getElementById('actionSelect').value;
-                        const parameters = availableActions[selectedAction]?.parameters || [];
-                        const params = {};
 
-                        // Collect the values of the parameters
-                        parameters.forEach(param => {
-                            const input = document.querySelector(`[name=${param}]`);
-                            if (input) {
-                                params[param] = input.value;
-                            }
-                        });
-
-                        if (!selectedAction) {
-                            return;
-                        }
-
-                        addAction(waypointId, selectedAction, params);
-
-                        // Close the dialog after adding the action
-                        $(this).dialog("close");
-                    }
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Error retrieving available actions:', error);
-        });
-}
 
 // Function to populate the select dropdown with action options
 function populateActionSelect() {
@@ -149,131 +108,7 @@ function updateParameters() {
     });
 }
 
-function addWaypoint(latLng) {
-    const lat = latLng.lat();
-    const lon = latLng.lng();
 
-    fetch('/add_waypoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({lat, lon})
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to add waypoint on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data.message);
-            getMission();
-        })
-        .catch(error => {
-            console.error('Error adding waypoint:', error);
-        });
-}
-
-function updateWaypoint(waypoint) {
-    fetch('/update_waypoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypoint.waypoint_id,
-            lat: waypoint.lat,
-            lon: waypoint.lon
-        })
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Waypoint updated on server:', data);
-            getMission();
-        })
-        .catch(error => {
-            console.error('Error updating waypoint on server:', error);
-        });
-}
-
-function removeWaypoint(waypointId) {
-    fetch('/remove_waypoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypointId
-        })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to remove waypoint on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data.message);
-            getMission();
-        })
-        .catch(error => {
-            console.error('Error removing waypoint:', error);
-        });
-}
-
-function addAction(waypointId, actionType, parameters) {
-    fetch('/add_action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypointId,
-            action_type: actionType,
-            parameters: parameters
-        })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to add action on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data.message);
-            getMission();
-        })
-        .catch(error => {
-            console.error('Error adding action:', error);
-        });
-}
-
-function removeAction(waypointId, actionId) {
-    fetch('/remove_action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypointId,
-            action_id: actionId
-        })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to remove action on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data.message);
-            getMission();
-        })
-        .catch(error => {
-            console.error('Error removing action:', error);
-        });
-}
 
 // Function to initialize the mission visualization
 function renderMissionToMap(data) {
@@ -404,4 +239,177 @@ function addWaypointToSidebar(waypoint) {
     waypointsList.appendChild(waypointElement);
 }
 
+function handleAddButtonClick(waypointId, availableActions) {
+    const selectedAction = document.getElementById('actionSelect').value;
+    const parameters = availableActions[selectedAction]?.parameters || [];
+    const params = {};
 
+    // Collect the values of the parameters
+    parameters.forEach(param => {
+        const input = document.querySelector(`[name=${param}]`);
+        if (input) {
+            params[param] = input.value;
+        }
+    });
+
+    if (!selectedAction) {
+        return;
+    }
+
+    addAction(waypointId, selectedAction, params);
+
+    // Close the dialog after adding the action
+    $("#popup").dialog("close");
+
+    // TODO: hide
+}
+
+// Server side functions
+function getAvailableActions(waypointId) {
+    fetch('/available_actions')
+        .then(response => response.json())
+        .then(data => {
+            availableActions = data;
+            populateActionSelect(data);
+
+            $("#popup").dialog({
+                modal: true,
+                width: "30%",
+                height: "auto",
+                buttons: {
+                    "Add": function() {
+                        handleAddButtonClick(waypointId, availableActions);
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error retrieving available actions:', error);
+        });
+}
+
+function addWaypoint(latLng) {
+    const lat = latLng.lat();
+    const lon = latLng.lng();
+
+    fetch('/add_waypoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({lat, lon})
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to add waypoint on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error adding waypoint:', error);
+        });
+}
+
+function updateWaypoint(waypoint) {
+    fetch('/update_waypoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypoint.waypoint_id,
+            lat: waypoint.lat,
+            lon: waypoint.lon
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Waypoint updated on server:', data);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error updating waypoint on server:', error);
+        });
+}
+
+function removeWaypoint(waypointId) {
+    fetch('/remove_waypoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypointId
+        })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to remove waypoint on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error removing waypoint:', error);
+        });
+}
+
+function addAction(waypointId, actionType, parameters) {
+    fetch('/add_action', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypointId,
+            action_type: actionType,
+            parameters: parameters
+        })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to add action on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error adding action:', error);
+        });
+}
+
+function removeAction(waypointId, actionId) {
+    fetch('/remove_action', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypointId,
+            action_id: actionId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to remove action on server.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data.message);
+        getMission();
+    })
+    .catch(error => {
+        console.error('Error removing action:', error);
+    });
+}

@@ -89,10 +89,9 @@ class Mission:
         self.update_ids()
 
     def update_ids(self):
-        # Reassign IDs
         waypoint_id = 0
-        action_id = 0
         for i, wp in enumerate(self.waypoints):
+            action_id = 0
             wp.waypoint_id = waypoint_id
             waypoint_id += 1
             for j, action in enumerate(wp.actions):
