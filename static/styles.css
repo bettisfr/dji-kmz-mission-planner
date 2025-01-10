@@ -1,11 +1,9 @@
-/* Ensure the map container takes up 70% of the width */
 #map {
     width: 80%;
     height: 95vh;
     float: left;
 }
 
-/* Sidebar (right column) containing the waypoints and actions */
 #sidebar {
     width: 20%;
     height: 95vh;
@@ -15,7 +13,6 @@
     float: left;
 }
 
-/* Style the waypoints list */
 #waypointsList {
     margin-top: 20px;
 }
@@ -58,23 +55,20 @@ div[id^="action-"] {
     border-left: 2px solid #ccc;
 }
 
-/* Add green style */
 .add-action {
     color: green;
-    text-decoration: none; /* Remove underline */
-    padding-left: 10px; /* Add left padding */
+    text-decoration: none;
+    padding-left: 10px;
     font-weight: bold;
 }
 
-/* Remove red style */
 .remove-action, .remove-waypoint {
     color: red;
-    text-decoration: none; /* Remove underline */
-    padding-left: 10px; /* Add left padding */
+    text-decoration: none;
+    padding-left: 10px;
     font-weight: bold;
 }
 
-/* Optional: Add hover effects */
 .add-action:hover {
     text-decoration: underline;
 }
@@ -90,7 +84,6 @@ div[id^="action-"] {
     text-align: left;
 }
 
-/* Ensure that the map and sidebar don't overlap */
 body {
     margin: 0;
     padding: 0;
@@ -98,7 +91,6 @@ body {
     justify-content: space-between;
 }
 
-/* Optional styling for the popup */
 #popup {
     display: none;
     background-color: white;

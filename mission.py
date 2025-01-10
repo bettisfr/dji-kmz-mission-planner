@@ -67,6 +67,10 @@ class Mission:
         self.payload_position_index = payload_position_index
         self.waypoints: List[Waypoint] = []
 
+    def add_waypoint_at(self, waypoint: Waypoint, index):
+        self.waypoints.insert(index, waypoint)
+        self.update_ids()
+
     def add_waypoint(self, waypoint: Waypoint):
         self.waypoints.append(waypoint)
         self.update_ids()

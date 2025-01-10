@@ -27,6 +27,7 @@ def load_mission():
 def available_actions():
     return jsonify(ACTIONS)
 
+
 @app.route('/add_waypoint', methods=['POST'])
 def add_waypoint():
     data = request.get_json()
@@ -36,6 +37,22 @@ def add_waypoint():
     wp_new = Waypoint(lat=lat, lon=lon)
     mission.add_waypoint(wp_new)
     print(f"Creating new waypoint {wp_new} with new coordinates: {lat}, {lon}")
+
+    print_mission(mission)
+
+    return jsonify({"status": "success", "message": f"Waypoint added successfully"}), 200
+
+
+@app.route('/add_waypoint_at', methods=['POST'])
+def add_waypoint_at():
+    data = request.get_json()
+    lat = data.get('lat')
+    lon = data.get('lon')
+    index = data.get('index')
+
+    wp_new = Waypoint(lat=lat, lon=lon)
+    mission.add_waypoint_at(wp_new, index)
+    print(f"Creating new waypoint {wp_new} between with new coordinates: {lat}, {lon}")
 
     print_mission(mission)
 

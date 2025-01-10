@@ -2,6 +2,7 @@
 let map;
 let polyline;
 let markers = [];
+let midlineMarkers = []
 let availableActions = {};
 
 // Dynamically load Google Maps API script without callback in URL
@@ -49,8 +50,6 @@ function getMission() {
         })
         .catch(error => console.error('Error loading mission:', error));
 }
-
-
 
 // Function to populate the select dropdown with action options
 function populateActionSelect() {
@@ -108,8 +107,6 @@ function updateParameters() {
     });
 }
 
-
-
 // Function to initialize the mission visualization
 function renderMissionToMap(data) {
     const waypointsList = document.getElementById('waypointsList');
@@ -121,6 +118,11 @@ function renderMissionToMap(data) {
         markers[i].setMap(null);
     }
     markers.length = 0;
+
+    if (midlineMarkers) {
+        midlineMarkers.forEach(marker => marker.setMap(null));
+    }
+    midlineMarkers = [];
 
     // Loop through each waypoint and add a marker to the map
     data.waypoints.forEach(waypoint => {
@@ -144,6 +146,44 @@ function renderMissionToMap(data) {
             strokeWeight: 4  // Thick line
         });
         polyline.setMap(map);
+
+        // Add "+" markers at the midpoints of each polyline segment
+        for (let i = 0; i < polylinePath.length - 1; i++) {
+            const midpoint = {
+                lat: (polylinePath[i].lat + polylinePath[i + 1].lat) / 2,
+                lng: (polylinePath[i].lng + polylinePath[i + 1].lng) / 2
+            };
+
+            // Thanks ChatGPT!
+            const midMarker = new google.maps.Marker({
+                position: midpoint,
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: 'green',
+                    fillOpacity: 1,
+                    strokeColor: 'green',
+                    strokeWeight: 2
+                },
+                label: {
+                    text: '+',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                },
+                title: "Click to add a waypoint",
+            });
+
+            // Add a click event listener to the mid-marker
+            midMarker.addListener('click', () => {
+                const latLng = new google.maps.LatLng(midpoint.lat, midpoint.lng);
+                addWaypointAt(latLng, i + 1);
+            });
+
+            midlineMarkers.push(midMarker); // Store the midline marker for future cleanup
+        }
+
     }
 }
 
@@ -277,7 +317,7 @@ function getAvailableActions(waypointId) {
                 width: "30%",
                 height: "auto",
                 buttons: {
-                    "Add": function() {
+                    "Add": function () {
                         handleAddButtonClick(waypointId, availableActions);
                     }
                 }
@@ -311,6 +351,32 @@ function addWaypoint(latLng) {
         })
         .catch(error => {
             console.error('Error adding waypoint:', error);
+        });
+}
+
+function addWaypointAt(latLng, index) {
+    const lat = latLng.lat();
+    const lon = latLng.lng();
+
+    fetch('/add_waypoint_at', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({lat, lon, index})
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to add waypoint on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error adding waypoint at:', error);
         });
 }
 
@@ -399,17 +465,17 @@ function removeAction(waypointId, actionId) {
             action_id: actionId
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to remove action on server.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log(data.message);
-        getMission();
-    })
-    .catch(error => {
-        console.error('Error removing action:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to remove action on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error removing action:', error);
+        });
 }
