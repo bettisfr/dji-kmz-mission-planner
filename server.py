@@ -36,7 +36,6 @@ def load_mission():
 
     file = request.files['file']
 
-    # If no file is selected, the browser may submit an empty part without a filename
     if file.filename == '':
         return "No selected file", 400
 
