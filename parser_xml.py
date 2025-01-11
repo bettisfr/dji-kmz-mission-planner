@@ -102,8 +102,8 @@ def mission_to_kmz(mission, mission_name):
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}templateId").text = '0'
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}executeHeightMode").text = 'relativeToStartPoint'
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}waylineId").text = '0'
-    etree.SubElement(folder, f"{{{namespaces['wpml']}}}distance").text = '284.281188964844'  # To be computed
-    etree.SubElement(folder, f"{{{namespaces['wpml']}}}duration").text = '69.7450637817383'  # To be computed
+    etree.SubElement(folder, f"{{{namespaces['wpml']}}}distance").text = str(mission.total_distance())
+    etree.SubElement(folder, f"{{{namespaces['wpml']}}}duration").text = str(mission.total_time())
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}autoFlightSpeed").text = str(mission.speed)
     
     for waypoint in mission.waypoints:

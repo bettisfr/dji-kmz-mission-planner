@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import List
+from geopy.distance import geodesic
 
 ACTIONS = {
     "takePhoto": {
@@ -74,6 +75,21 @@ class Mission:
         self.speed = speed
         self.payload_index = payload_index
         self.waypoints: List[Waypoint] = []
+
+    def total_distance(self) -> float:
+        if len(self.waypoints) < 2:
+            return 0.0
+
+        total = 0.0
+        for i in range(len(self.waypoints) - 1):
+            wp1 = (self.waypoints[i].lat, self.waypoints[i].lon)
+            wp2 = (self.waypoints[i + 1].lat, self.waypoints[i + 1].lon)
+            total += geodesic(wp1, wp2).meters
+
+        return round(total, 2)
+
+    def total_time(self) -> float:
+        return round(self.total_distance() / self.speed, 2)
 
     def add_waypoint_at(self, waypoint: Waypoint, index):
         self.waypoints.insert(index, waypoint)
