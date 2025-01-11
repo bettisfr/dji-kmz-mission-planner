@@ -1,7 +1,7 @@
 import os
 import shutil
 from lxml import etree
-from mission import create_mock_mission
+# from mission import create_mock_mission
 
 
 def write_pretty_xml(element, file_path):
@@ -51,19 +51,49 @@ def mission_to_kmz(mission, mission_name):
     etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}finishAction").text = 'goHome'
     etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}exitOnRCLost").text = 'executeLostAction'
     etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}executeRCLostAction").text = 'hover'
-    etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}takeOffSecurityHeight").text = '20'
-    etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}globalTransitionalSpeed").text = '15'
+    etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}takeOffSecurityHeight").text = str(mission.height)
+    etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}globalTransitionalSpeed").text = str(mission.speed)
 
     # Add <wpml:droneInfo>
     drone_info = etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}droneInfo")
+    # 42 (H20),
+    # 43 (H20T)
+    # 52 (M30),
+    # 53 (M30T)
+    # 61 (H20N)
+    # 66 (Mavic 3E Camera)
+    # 67 (Mavic 3T Camera)
+    # 68 (Mavic 3M Camera)
+    # 80 (Matrice 3D Camera)
+    # 81(Matrice 3TD Camera)
+    # 65534 (PSDK Payload Device)
+    # 82 (H30)
+    # 83 (H30T)
     etree.SubElement(drone_info, f"{{{namespaces['wpml']}}}droneEnumValue").text = '60'
-    etree.SubElement(drone_info, f"{{{namespaces['wpml']}}}droneSubEnumValue").text = '0'
+    # etree.SubElement(drone_info, f"{{{namespaces['wpml']}}}droneSubEnumValue").text = '0'
 
     # Add <wpml:payloadInfo>
     payload_info = etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}payloadInfo")
+    # 42 (H20),
+    # 43 (H20T)
+    # 52 (M30),
+    # 53 (M30T)
+    # 61 (H20N)
+    # 66 (Mavic 3E Camera)
+    # 67 (Mavic 3T Camera)
+    # 68 (Mavic 3M Camera)
+    # 80 (Matrice 3D Camera)
+    # 81(Matrice 3TD Camera)
+    # 65534 (PSDK Payload Device)
+    # 82 (H30)
+    # 83 (H30T
     etree.SubElement(payload_info, f"{{{namespaces['wpml']}}}payloadEnumValue").text = '42'
-    etree.SubElement(payload_info, f"{{{namespaces['wpml']}}}payloadSubEnumValue").text = '0'
-    etree.SubElement(payload_info, f"{{{namespaces['wpml']}}}payloadPositionIndex").text = '0'
+    # etree.SubElement(payload_info, f"{{{namespaces['wpml']}}}payloadSubEnumValue").text = '0'
+
+    # 0: Mount position of 1. The M300 RTK and M350 RTK models correspond to the front left of the drone. Other models correspond to the main gimbal.
+    # 1: Mount position of 2. The M300 RTK and M350 RTK models correspond to the front right of the drone.
+    # 2: Mount position of 3. The M300 RTK and M350 RTK models correspond to the top of the aircraft.
+    etree.SubElement(payload_info, f"{{{namespaces['wpml']}}}payloadPositionIndex").text = str(mission.payload_index)
 
     # Add <Folder>
     folder = etree.SubElement(document_waylines, 'Folder')
@@ -74,7 +104,7 @@ def mission_to_kmz(mission, mission_name):
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}waylineId").text = '0'
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}distance").text = '284.281188964844'  # To be computed
     etree.SubElement(folder, f"{{{namespaces['wpml']}}}duration").text = '69.7450637817383'  # To be computed
-    etree.SubElement(folder, f"{{{namespaces['wpml']}}}autoFlightSpeed").text = '5'
+    etree.SubElement(folder, f"{{{namespaces['wpml']}}}autoFlightSpeed").text = str(mission.speed)
     
     for waypoint in mission.waypoints:
         # Add <Placemark>
@@ -124,7 +154,7 @@ def mission_to_kmz(mission, mission_name):
     create_kmz(mission_name, wpmz_folder)
 
 
-if __name__ == '__main__':
-    mission = create_mock_mission()
-    mission_to_kmz(mission, "azz")
+# if __name__ == '__main__':
+#     mission = create_mock_mission()
+#     mission_to_kmz(mission, "azz")
     

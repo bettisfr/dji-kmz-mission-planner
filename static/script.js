@@ -40,6 +40,35 @@ function initMap() {
 
     // Load the current mission from the server
     getMission();
+
+    addOptionsButtons();
+}
+
+function addOptionsButtons() {
+    // Add "Save" and "Load" buttons dynamically
+    const optionsDiv = document.getElementById("options");
+
+    const saveButton = document.createElement("button");
+    saveButton.innerText = "Save";
+    saveButton.id = "saveButton";
+    saveButton.classList.add("option-button"); // Optional, for styling
+    optionsDiv.appendChild(saveButton);
+
+    const loadButton = document.createElement("button");
+    loadButton.innerText = "Load";
+    loadButton.id = "loadButton";
+    loadButton.classList.add("option-button"); // Optional, for styling
+    optionsDiv.appendChild(loadButton);
+
+    // Add event listeners for buttons
+    saveButton.addEventListener("click", function () {
+        window.location.href = "/save_mission";
+    });
+
+    loadButton.addEventListener("click", function () {
+        // loadMission();
+        alert("Not implemented yet");
+    });
 }
 
 

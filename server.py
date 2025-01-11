@@ -1,5 +1,6 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 from mission import create_mock_mission, print_mission, Waypoint, Action, ACTIONS
+from parser_xml import mission_to_kmz
 
 app = Flask(__name__)
 
@@ -23,6 +24,16 @@ def index():
 def load_mission():
     print_mission(mission)
     return jsonify(mission.to_dict())
+
+
+@app.route('/save_mission')
+def save_mission():
+    mission_to_kmz(mission, "mission")
+    output_directory = "out"
+    filename = "mission.kmz"
+
+    # Send the file to the client
+    return send_from_directory(output_directory, filename, as_attachment=True)
 
 
 @app.route('/available_actions')
