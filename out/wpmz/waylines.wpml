@@ -20,12 +20,12 @@
       <wpml:templateId>0</wpml:templateId>
       <wpml:executeHeightMode>relativeToStartPoint</wpml:executeHeightMode>
       <wpml:waylineId>0</wpml:waylineId>
-      <wpml:distance>418.92</wpml:distance>
-      <wpml:duration>83.78</wpml:duration>
+      <wpml:distance>1028.37</wpml:distance>
+      <wpml:duration>205.67</wpml:duration>
       <wpml:autoFlightSpeed>5.0</wpml:autoFlightSpeed>
       <Placemark>
         <Point>
-          <coordinates>12.549784090599045,43.06229630922861</coordinates>
+          <coordinates>43.06228847061445,12.550218608459458</coordinates>
         </Point>
         <wpml:index>0</wpml:index>
         <wpml:executeHeight>10.0</wpml:executeHeight>
@@ -65,7 +65,7 @@
       </Placemark>
       <Placemark>
         <Point>
-          <coordinates>12.549784090599045,43.063526959224724</coordinates>
+          <coordinates>43.063526959224724,12.549784090599045</coordinates>
         </Point>
         <wpml:index>1</wpml:index>
         <wpml:executeHeight>10.0</wpml:executeHeight>
@@ -104,7 +104,7 @@
       </Placemark>
       <Placemark>
         <Point>
-          <coordinates>12.551495339950547,43.063526959224724</coordinates>
+          <coordinates>43.063526959224724,12.551495339950547</coordinates>
         </Point>
         <wpml:index>2</wpml:index>
         <wpml:executeHeight>10.0</wpml:executeHeight>
@@ -143,7 +143,7 @@
       </Placemark>
       <Placemark>
         <Point>
-          <coordinates>12.551495339950547,43.062241438908295</coordinates>
+          <coordinates>43.06221792304171,12.550749685844407</coordinates>
         </Point>
         <wpml:index>3</wpml:index>
         <wpml:executeHeight>10.0</wpml:executeHeight>
@@ -178,6 +178,106 @@
               <wpml:aircraftHeading>-90</wpml:aircraftHeading>
             </wpml:actionActuatorFuncParam>
           </wpml:action>
+        </wpml:actionGroup>
+      </Placemark>
+      <Placemark>
+        <Point>
+          <coordinates>43.062237519597836,12.552282819753513</coordinates>
+        </Point>
+        <wpml:index>4</wpml:index>
+        <wpml:executeHeight>10.0</wpml:executeHeight>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
+        <wpml:waypointHeadingParam>
+          <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
+        </wpml:waypointHeadingParam>
+        <wpml:waypointTurnParam>
+          <wpml:waypointTurnMode>toPointAndStopWithDiscontinuityCurvature</wpml:waypointTurnMode>
+          <wpml:waypointTurnDampingDist>0</wpml:waypointTurnDampingDist>
+        </wpml:waypointTurnParam>
+        <wpml:useStraightLine>1</wpml:useStraightLine>
+        <wpml:actionGroup>
+          <wpml:actionGroupId>4</wpml:actionGroupId>
+          <wpml:actionGroupStartIndex>4</wpml:actionGroupStartIndex>
+          <wpml:actionGroupEndIndex>4</wpml:actionGroupEndIndex>
+          <wpml:actionGroupMode>sequence</wpml:actionGroupMode>
+          <wpml:actionTrigger>
+            <wpml:actionTriggerType>reachPoint</wpml:actionTriggerType>
+          </wpml:actionTrigger>
+        </wpml:actionGroup>
+      </Placemark>
+      <Placemark>
+        <Point>
+          <coordinates>43.063499524621434,12.551692733770237</coordinates>
+        </Point>
+        <wpml:index>5</wpml:index>
+        <wpml:executeHeight>10.0</wpml:executeHeight>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
+        <wpml:waypointHeadingParam>
+          <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
+        </wpml:waypointHeadingParam>
+        <wpml:waypointTurnParam>
+          <wpml:waypointTurnMode>toPointAndStopWithDiscontinuityCurvature</wpml:waypointTurnMode>
+          <wpml:waypointTurnDampingDist>0</wpml:waypointTurnDampingDist>
+        </wpml:waypointTurnParam>
+        <wpml:useStraightLine>1</wpml:useStraightLine>
+        <wpml:actionGroup>
+          <wpml:actionGroupId>5</wpml:actionGroupId>
+          <wpml:actionGroupStartIndex>5</wpml:actionGroupStartIndex>
+          <wpml:actionGroupEndIndex>5</wpml:actionGroupEndIndex>
+          <wpml:actionGroupMode>sequence</wpml:actionGroupMode>
+          <wpml:actionTrigger>
+            <wpml:actionTriggerType>reachPoint</wpml:actionTriggerType>
+          </wpml:actionTrigger>
+        </wpml:actionGroup>
+      </Placemark>
+      <Placemark>
+        <Point>
+          <coordinates>43.06350736308077,12.553575644498691</coordinates>
+        </Point>
+        <wpml:index>6</wpml:index>
+        <wpml:executeHeight>10.0</wpml:executeHeight>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
+        <wpml:waypointHeadingParam>
+          <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
+        </wpml:waypointHeadingParam>
+        <wpml:waypointTurnParam>
+          <wpml:waypointTurnMode>toPointAndStopWithDiscontinuityCurvature</wpml:waypointTurnMode>
+          <wpml:waypointTurnDampingDist>0</wpml:waypointTurnDampingDist>
+        </wpml:waypointTurnParam>
+        <wpml:useStraightLine>1</wpml:useStraightLine>
+        <wpml:actionGroup>
+          <wpml:actionGroupId>6</wpml:actionGroupId>
+          <wpml:actionGroupStartIndex>6</wpml:actionGroupStartIndex>
+          <wpml:actionGroupEndIndex>6</wpml:actionGroupEndIndex>
+          <wpml:actionGroupMode>sequence</wpml:actionGroupMode>
+          <wpml:actionTrigger>
+            <wpml:actionTriggerType>reachPoint</wpml:actionTriggerType>
+          </wpml:actionTrigger>
+        </wpml:actionGroup>
+      </Placemark>
+      <Placemark>
+        <Point>
+          <coordinates>43.062261035456906,12.552524218564853</coordinates>
+        </Point>
+        <wpml:index>7</wpml:index>
+        <wpml:executeHeight>10.0</wpml:executeHeight>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
+        <wpml:waypointHeadingParam>
+          <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
+        </wpml:waypointHeadingParam>
+        <wpml:waypointTurnParam>
+          <wpml:waypointTurnMode>toPointAndStopWithDiscontinuityCurvature</wpml:waypointTurnMode>
+          <wpml:waypointTurnDampingDist>0</wpml:waypointTurnDampingDist>
+        </wpml:waypointTurnParam>
+        <wpml:useStraightLine>1</wpml:useStraightLine>
+        <wpml:actionGroup>
+          <wpml:actionGroupId>7</wpml:actionGroupId>
+          <wpml:actionGroupStartIndex>7</wpml:actionGroupStartIndex>
+          <wpml:actionGroupEndIndex>7</wpml:actionGroupEndIndex>
+          <wpml:actionGroupMode>sequence</wpml:actionGroupMode>
+          <wpml:actionTrigger>
+            <wpml:actionTriggerType>reachPoint</wpml:actionTriggerType>
+          </wpml:actionTrigger>
         </wpml:actionGroup>
       </Placemark>
     </Folder>

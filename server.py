@@ -2,7 +2,7 @@ import os
 
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from mission import create_mock_mission, print_mission, Waypoint, Action, ACTIONS
-from parser_xml import mission_to_kmz
+from parser_xml import mission_to_kmz, kmz_to_mission
 
 app = Flask(__name__)
 
@@ -30,7 +30,7 @@ def get_mission():
 
 @app.route('/load_mission', methods=['POST'])
 def load_mission():
-    # Check if the request contains a file part
+    global mission
     if 'file' not in request.files:
         return "No file part", 400
 
@@ -43,7 +43,12 @@ def load_mission():
     file_path = os.path.join(out_folder, file.filename)
     file.save(file_path)
 
-    return f"File {file.filename} uploaded successfully", 200
+    mission_name = file.filename.split(".")[0]
+    mission = kmz_to_mission(mission_name)
+    print_mission(mission)
+
+    return jsonify({"status": "success", "message": f"Mission loaded successfully"}), 200
+
 
 @app.route('/save_mission')
 def save_mission():

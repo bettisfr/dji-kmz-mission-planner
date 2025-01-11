@@ -139,6 +139,7 @@ class Mission:
 
 
 def print_mission(mission: Mission):
+    print("-------------------------------")
     print(f"Mission Details:")
     print(f"  height: {mission.height}")
     print(f"  speed: {mission.speed}")

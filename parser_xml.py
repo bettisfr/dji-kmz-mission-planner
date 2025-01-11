@@ -117,7 +117,7 @@ def mission_to_kmz(mission, mission_name):
         # Add <Point>
         point = etree.SubElement(placemark, 'Point')
         coordinates = etree.SubElement(point, 'coordinates')
-        coordinates.text = f"{waypoint.lon},{waypoint.lat}"
+        coordinates.text = f"{waypoint.lat},{waypoint.lon}"
 
         etree.SubElement(placemark, f"{{{namespaces['wpml']}}}index").text = str(waypoint.waypoint_id)
         etree.SubElement(placemark, f"{{{namespaces['wpml']}}}executeHeight").text = str(mission.height)
@@ -220,7 +220,9 @@ def kmz_to_mission(mission_name):
         mission.add_waypoint(wp)
 
     shutil.rmtree(temp_dir)
-    print_mission(mission)
+
+    return mission
+    # print_mission(mission)
 
 
 if __name__ == '__main__':

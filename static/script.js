@@ -66,11 +66,20 @@ function addOptionsButtons() {
     });
 
     loadButton.addEventListener("click", function () {
-        // loadMission();
-        alert("Not implemented yet");
+        // Dynamically create an <input type="file">
+        let fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.id = 'fileInput';
+
+        // Trigger a click event to open the file dialog
+        fileInput.click();
+
+        // When a file is selected
+        fileInput.addEventListener('change', function () {
+            loadMission(fileInput);
+        });
     });
 }
-
 
 
 // Function to populate the select dropdown with action options
@@ -384,6 +393,33 @@ function getMission() {
             renderMissionToMap(data);
         })
         .catch(error => console.error('Error loading mission:', error));
+}
+
+function loadMission(fileInput) {
+    let formData = new FormData();
+
+    if (fileInput.files.length > 0) {
+        formData.append('file', fileInput.files[0]);
+
+        fetch('/load_mission', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load mission on server.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data.message);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error loading mission:', error);
+        });
+    } else {
+        alert('Please select a file to upload');
+    }
 }
 
 function getAvailableActions(waypointId) {
