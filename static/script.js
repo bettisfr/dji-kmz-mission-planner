@@ -42,14 +42,7 @@ function initMap() {
     getMission();
 }
 
-function getMission() {
-    fetch('/load_mission')
-        .then(response => response.json())
-        .then(data => {
-            renderMissionToMap(data);
-        })
-        .catch(error => console.error('Error loading mission:', error));
-}
+
 
 // Function to populate the select dropdown with action options
 function populateActionSelect() {
@@ -138,7 +131,7 @@ function renderMissionToMap(data) {
 
             // Add a blur event listener to update and reset the background
             input.addEventListener('blur', () => {
-                // TODO updateGlobalParameter(key, input.value);
+                updateGlobalParameter(key, input.value);
                 input.style.backgroundColor = '';
             });
 
@@ -147,7 +140,6 @@ function renderMissionToMap(data) {
             globalParameters.appendChild(paramElement);
         }
     });
-
 
     const waypointsList = document.getElementById('waypointsList');
     waypointsList.innerHTML = '<strong>Waypoints</strong>';
@@ -356,6 +348,15 @@ function handleAddButtonClick(waypointId, availableActions) {
 }
 
 // Server side functions
+function getMission() {
+    fetch('/load_mission')
+        .then(response => response.json())
+        .then(data => {
+            renderMissionToMap(data);
+        })
+        .catch(error => console.error('Error loading mission:', error));
+}
+
 function getAvailableActions(waypointId) {
     fetch('/available_actions')
         .then(response => response.json())
@@ -453,6 +454,27 @@ function updateWaypoint(waypoint) {
         });
 }
 
+function updateGlobalParameter(variable, value) {
+    fetch('/update_global_parameter', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            variable: variable,
+            value: value
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Global parameter updated on server:', data);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error updating global parameter on server:', error);
+        });
+}
+
 function updateAction(waypointId, actionId, param, value) {
     fetch('/update_action', {
         method: 'POST',
@@ -472,7 +494,7 @@ function updateAction(waypointId, actionId, param, value) {
             getMission();
         })
         .catch(error => {
-            console.error('Error updating ation on server:', error);
+            console.error('Error updating action on server:', error);
         });
 }
 

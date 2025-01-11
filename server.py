@@ -4,6 +4,8 @@ from mission import create_mock_mission, print_mission, Waypoint, Action, ACTION
 app = Flask(__name__)
 
 mission = create_mock_mission()
+
+
 # print_mission(mission)
 # mission.waypoints[3].update_waypoint_action(7, "aircraftHeading", -999)
 # print_mission(mission)
@@ -73,6 +75,7 @@ def update_waypoint():
 
     return jsonify({"status": "success", "message": f"Waypoint updated successfully"}), 200
 
+
 @app.route('/update_action', methods=['POST'])
 def update_action():
     data = request.get_json()
@@ -83,6 +86,28 @@ def update_action():
 
     mission.waypoints[waypoint_id].update_waypoint_action(action_id, action_type, parameter)
     print(f"Updating action {action_type} on waypoint {waypoint_id} with new value: {parameter}")
+
+    print_mission(mission)
+
+    return jsonify({"status": "success", "message": f"Waypoint updated successfully"}), 200
+
+
+@app.route('/update_global_parameter', methods=['POST'])
+def update_global_parameter():
+    data = request.get_json()
+    variable = data.get('variable')
+    value = int(data.get('value'))
+
+    if variable == "height":
+        mission.height = value
+    elif variable == "speed":
+        mission.speed = value
+    elif variable == "payloadIndex":
+        mission.payload_index = value
+    else:
+        return jsonify({"status": "error", "message": f"Invalid variable"}), 400
+
+    print(f"Updating global parameter {variable} with new value: {value}")
 
     print_mission(mission)
 

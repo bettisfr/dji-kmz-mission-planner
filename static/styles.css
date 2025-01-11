@@ -1,10 +1,12 @@
 #map {
-    width: 80%;
+    margin: 10px;
+    width: 78%;
     height: 95vh;
     float: left;
 }
 
 #sidebar {
+    margin: 10px;
     width: 20%;
     height: 95vh;
     padding: 10px;
