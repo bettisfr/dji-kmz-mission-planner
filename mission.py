@@ -11,8 +11,9 @@ ACTIONS = {
         "parameters": ["focalLength"]
     },
     "gimbalRotate": {
-        "parameters": ["gimbalRotateMode", "gimbalPitchRotateEnable", "gimbalPitchRotateAngle",
-                       "gimbalYawRotateEnable", "gimbalYawRotateAngle"]
+        # "parameters": ["gimbalRotateMode", "gimbalPitchRotateEnable", "gimbalPitchRotateAngle",
+        #                "gimbalYawRotateEnable", "gimbalYawRotateAngle"]
+        "parameters": ["gimbalPitchRotateAngle", "gimbalYawRotateAngle"]
     },
     "rotateYaw": {
         "parameters": ["aircraftHeading"]
@@ -43,6 +44,13 @@ class Waypoint:
         self.lat = lat
         self.lon = lon
         self.actions: List[Action] = []
+
+    def update_waypoint_coordinates(self, lat, lon):
+        self.lat = lat
+        self.lon = lon
+
+    def update_waypoint_action(self, action_id, action_type, parameter):
+        self.actions[action_id].parameters[action_type] = parameter
 
     def add_action(self, action: Action, mission):
         self.actions.append(action)
@@ -138,47 +146,47 @@ def create_mock_mission():
     mission = Mission(height=10.0, speed=5.0, payload_position_index=0)
 
     wp0 = Waypoint(lat=43.06229630922861, lon=12.549784090599045)
-    wp0.add_action(Action("hover", hoverTime=5), mission)
+    wp0.add_action(Action("focus", focusX=0.5, focusY=0.5), mission)
     wp0.add_action(Action("rotateYaw", aircraftHeading=-90), mission)
-    wp0.add_action(Action("hover", hoverTime=5), mission)
-    wp0.add_action(Action("rotateYaw", aircraftHeading=90), mission)
-    wp0.add_action(Action("hover", hoverTime=5), mission)
-    wp0.add_action(Action("rotateYaw", aircraftHeading=0), mission)
-    wp0.add_action(Action("hover", hoverTime=5), mission)
-    wp0.add_action(Action("rotateYaw", aircraftHeading=180), mission)
+    # wp0.add_action(Action("hover", hoverTime=5), mission)
+    # wp0.add_action(Action("rotateYaw", aircraftHeading=90), mission)
+    # wp0.add_action(Action("hover", hoverTime=5), mission)
+    # wp0.add_action(Action("rotateYaw", aircraftHeading=0), mission)
+    # wp0.add_action(Action("hover", hoverTime=5), mission)
+    # wp0.add_action(Action("rotateYaw", aircraftHeading=180), mission)
     mission.add_waypoint(wp0)
 
     wp1 = Waypoint(lat=43.063526959224724, lon=12.549784090599045)
     wp1.add_action(Action("hover", hoverTime=5), mission)
     wp1.add_action(Action("rotateYaw", aircraftHeading=-90), mission)
-    wp1.add_action(Action("hover", hoverTime=5), mission)
-    wp1.add_action(Action("rotateYaw", aircraftHeading=90), mission)
-    wp1.add_action(Action("hover", hoverTime=5), mission)
-    wp1.add_action(Action("rotateYaw", aircraftHeading=0), mission)
-    wp1.add_action(Action("hover", hoverTime=5), mission)
-    wp1.add_action(Action("rotateYaw", aircraftHeading=180), mission)
+    # wp1.add_action(Action("hover", hoverTime=5), mission)
+    # wp1.add_action(Action("rotateYaw", aircraftHeading=90), mission)
+    # wp1.add_action(Action("hover", hoverTime=5), mission)
+    # wp1.add_action(Action("rotateYaw", aircraftHeading=0), mission)
+    # wp1.add_action(Action("hover", hoverTime=5), mission)
+    # wp1.add_action(Action("rotateYaw", aircraftHeading=180), mission)
     mission.add_waypoint(wp1)
 
     wp2 = Waypoint(lat=43.063526959224724, lon=12.551495339950547)
     wp2.add_action(Action("hover", hoverTime=5), mission)
     wp2.add_action(Action("rotateYaw", aircraftHeading=-90), mission)
-    wp2.add_action(Action("hover", hoverTime=5), mission)
-    wp2.add_action(Action("rotateYaw", aircraftHeading=90), mission)
-    wp2.add_action(Action("hover", hoverTime=5), mission)
-    wp2.add_action(Action("rotateYaw", aircraftHeading=0), mission)
-    wp2.add_action(Action("hover", hoverTime=5), mission)
-    wp2.add_action(Action("rotateYaw", aircraftHeading=180), mission)
+    # wp2.add_action(Action("hover", hoverTime=5), mission)
+    # wp2.add_action(Action("rotateYaw", aircraftHeading=90), mission)
+    # wp2.add_action(Action("hover", hoverTime=5), mission)
+    # wp2.add_action(Action("rotateYaw", aircraftHeading=0), mission)
+    # wp2.add_action(Action("hover", hoverTime=5), mission)
+    # wp2.add_action(Action("rotateYaw", aircraftHeading=180), mission)
     mission.add_waypoint(wp2)
 
     wp3 = Waypoint(lat=43.062241438908295, lon=12.551495339950547)
     wp3.add_action(Action("hover", hoverTime=5), mission)
     wp3.add_action(Action("rotateYaw", aircraftHeading=-90), mission)
-    wp3.add_action(Action("hover", hoverTime=5), mission)
-    wp3.add_action(Action("rotateYaw", aircraftHeading=90), mission)
-    wp3.add_action(Action("hover", hoverTime=5), mission)
-    wp3.add_action(Action("rotateYaw", aircraftHeading=0), mission)
-    wp3.add_action(Action("hover", hoverTime=5), mission)
-    wp3.add_action(Action("rotateYaw", aircraftHeading=180), mission)
+    # wp3.add_action(Action("hover", hoverTime=5), mission)
+    # wp3.add_action(Action("rotateYaw", aircraftHeading=90), mission)
+    # wp3.add_action(Action("hover", hoverTime=5), mission)
+    # wp3.add_action(Action("rotateYaw", aircraftHeading=0), mission)
+    # wp3.add_action(Action("hover", hoverTime=5), mission)
+    # wp3.add_action(Action("rotateYaw", aircraftHeading=180), mission)
     mission.add_waypoint(wp3)
 
     return mission

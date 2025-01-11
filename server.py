@@ -4,8 +4,8 @@ from mission import create_mock_mission, print_mission, Waypoint, Action, ACTION
 app = Flask(__name__)
 
 mission = create_mock_mission()
-
-
+# print_mission(mission)
+# mission.waypoints[3].update_waypoint_action(7, "aircraftHeading", -999)
 # print_mission(mission)
 # mission.remove_waypoint(1)
 # print_mission(mission)
@@ -66,9 +66,23 @@ def update_waypoint():
     lat = data.get('lat')
     lon = data.get('lon')
 
-    mission.waypoints[waypoint_id].lat = lat
-    mission.waypoints[waypoint_id].lon = lon
+    mission.waypoints[waypoint_id].update_waypoint_coordinates(lat, lon)
     print(f"Updating waypoint {waypoint_id} with new coordinates: {lat}, {lon}")
+
+    print_mission(mission)
+
+    return jsonify({"status": "success", "message": f"Waypoint updated successfully"}), 200
+
+@app.route('/update_action', methods=['POST'])
+def update_action():
+    data = request.get_json()
+    waypoint_id = int(data.get('waypoint_id'))
+    action_id = int(data.get('action_id'))
+    action_type = data.get('action_type')
+    parameter = data.get('parameter')
+
+    mission.waypoints[waypoint_id].update_waypoint_action(action_id, action_type, parameter)
+    print(f"Updating action {action_type} on waypoint {waypoint_id} with new value: {parameter}")
 
     print_mission(mission)
 

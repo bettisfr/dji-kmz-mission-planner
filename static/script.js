@@ -154,7 +154,7 @@ function renderMissionToMap(data) {
                 lng: (polylinePath[i].lng + polylinePath[i + 1].lng) / 2
             };
 
-            // Thanks ChatGPT!
+            // Thanks, ChatGPT!
             const midMarker = new google.maps.Marker({
                 position: midpoint,
                 map: map,
@@ -241,7 +241,7 @@ function addWaypointToSidebar(waypoint) {
     // Populate the list of actions
     waypoint.actions.forEach(action => {
         const actionElement = document.createElement('div');
-        actionElement.id = `action-${action.action_id}`;
+        actionElement.id = `action-${waypoint.waypoint_id}-${action.action_id}`;
         actionElement.innerHTML = `<b>${action.action_id} - ${action.action_type}</b> <b><a href="#" class="remove-action">del</a></b>`;
 
         // Listener for removing an action
@@ -264,6 +264,18 @@ function addWaypointToSidebar(waypoint) {
             input.type = 'text';
             input.value = value;
             input.classList.add('parameter-input');
+
+            // Add an input event listener for changes
+            input.addEventListener('input', () => {
+                input.style.backgroundColor = 'lightcoral';
+            });
+
+            // Add a blur event listener to detect when the input loses focus
+            input.addEventListener('blur', () => {
+                const [_, waypointId, actionId] = actionElement.id.split('-');
+                updateAction(waypointId, actionId, param, input.value);
+                input.style.backgroundColor = '';
+            });
 
             paramElement.appendChild(label);
             paramElement.appendChild(input);
@@ -399,6 +411,29 @@ function updateWaypoint(waypoint) {
         })
         .catch(error => {
             console.error('Error updating waypoint on server:', error);
+        });
+}
+
+function updateAction(waypointId, actionId, param, value) {
+    fetch('/update_action', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            waypoint_id: waypointId,
+            action_id: actionId,
+            action_type: param,
+            parameter: value
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Action updated on server:', data);
+            getMission();
+        })
+        .catch(error => {
+            console.error('Error updating ation on server:', error);
         });
 }
 
