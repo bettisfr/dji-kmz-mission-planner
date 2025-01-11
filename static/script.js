@@ -109,8 +109,48 @@ function updateParameters() {
 
 // Function to initialize the mission visualization
 function renderMissionToMap(data) {
+    globalParameters.innerHTML = '<strong>Parameters</strong>';
+
+    Object.entries(data).forEach(([key, value]) => {
+        // Only process scalar values (numbers or strings)
+        if (typeof value === 'number' || typeof value === 'string') {
+            const paramElement = document.createElement('div');
+            paramElement.classList.add('actions-list');
+            paramElement.style.display = 'flex';
+            paramElement.style.alignItems = 'center';
+            paramElement.style.marginBottom = '5px';
+
+            const label = document.createElement('span');
+            label.textContent = `${key}: `;
+            label.style.flex = '1';
+            label.style.fontWeight = 'bold';
+            label.style.marginRight = '10px';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = value;
+            input.classList.add('parameter-input');
+
+            // Add an input event listener for changes
+            input.addEventListener('input', () => {
+                input.style.backgroundColor = 'lightcoral';
+            });
+
+            // Add a blur event listener to update and reset the background
+            input.addEventListener('blur', () => {
+                // TODO updateGlobalParameter(key, input.value);
+                input.style.backgroundColor = '';
+            });
+
+            paramElement.appendChild(label);
+            paramElement.appendChild(input);
+            globalParameters.appendChild(paramElement);
+        }
+    });
+
+
     const waypointsList = document.getElementById('waypointsList');
-    waypointsList.innerHTML = '<strong>Waypoints</strong>'; // Clear existing text
+    waypointsList.innerHTML = '<strong>Waypoints</strong>';
 
     const polylinePath = [];
 
@@ -183,7 +223,6 @@ function renderMissionToMap(data) {
 
             midlineMarkers.push(midMarker); // Store the midline marker for future cleanup
         }
-
     }
 }
 

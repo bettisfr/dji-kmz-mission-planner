@@ -69,10 +69,10 @@ class Waypoint:
 
 
 class Mission:
-    def __init__(self, height: float, speed: float, payload_position_index: int):
+    def __init__(self, height: float, speed: float, payload_index: int):
         self.height = height
         self.speed = speed
-        self.payload_position_index = payload_position_index
+        self.payload_index = payload_index
         self.waypoints: List[Waypoint] = []
 
     def add_waypoint_at(self, waypoint: Waypoint, index):
@@ -117,7 +117,7 @@ class Mission:
         return {
             'height': self.height,
             'speed': self.speed,
-            'payload_position_index': self.payload_position_index,
+            'payloadIndex': self.payload_index,
             'waypoints': [waypoint.to_dict() for waypoint in self.waypoints]
         }
 
@@ -126,7 +126,7 @@ def print_mission(mission: Mission):
     print(f"Mission Details:")
     print(f"  height: {mission.height}")
     print(f"  speed: {mission.speed}")
-    print(f"  payload index: {mission.payload_position_index}")
+    print(f"  payload index: {mission.payload_index}")
     print(f"  waypoints:")
     for waypoint in mission.waypoints:
         print(f"    {waypoint.waypoint_id}: latitude: {waypoint.lat}, longitude: {waypoint.lon}")
@@ -139,11 +139,11 @@ def print_mission(mission: Mission):
 
 
 def create_empty_mission():
-    return Mission(height=10.0, speed=10.0, payload_position_index=0)
+    return Mission(height=10.0, speed=10.0, payload_index=0)
 
 
 def create_mock_mission():
-    mission = Mission(height=10.0, speed=5.0, payload_position_index=0)
+    mission = Mission(height=10.0, speed=5.0, payload_index=0)
 
     wp0 = Waypoint(lat=43.06229630922861, lon=12.549784090599045)
     wp0.add_action(Action("focus", focusX=0.5, focusY=0.5), mission)

@@ -31,6 +31,24 @@
     background-color: #eaeaea;
 }
 
+#globalParameters {
+    margin-top: 20px;
+}
+
+#globalParameters strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+#globalParameters div {
+    border-radius: 5px;
+}
+
+#globalParameters div:hover {
+    background-color: #eaeaea;
+}
+
 .waypoint-coordinates {
     border: 1px solid #ccc;
 }
@@ -78,7 +96,7 @@ div[id^="action-"] {
 }
 
 .parameter-input {
-    width: 40%;
+    width: 25%;
     box-sizing: border-box;
     float: right;
     text-align: left;
