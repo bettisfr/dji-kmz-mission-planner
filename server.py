@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, jsonify, request, send_from_directory
 from mission import create_mock_mission, print_mission, Waypoint, Action, ACTIONS
 from parser_xml import mission_to_kmz
@@ -20,11 +22,29 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/load_mission')
-def load_mission():
+@app.route('/get_mission')
+def get_mission():
     print_mission(mission)
     return jsonify(mission.to_dict())
 
+
+@app.route('/load_mission', methods=['POST'])
+def load_mission():
+    # Check if the request contains a file part
+    if 'file' not in request.files:
+        return "No file part", 400
+
+    file = request.files['file']
+
+    # If no file is selected, the browser may submit an empty part without a filename
+    if file.filename == '':
+        return "No selected file", 400
+
+    out_folder = 'out'
+    file_path = os.path.join(out_folder, file.filename)
+    file.save(file_path)
+
+    return f"File {file.filename} uploaded successfully", 200
 
 @app.route('/save_mission')
 def save_mission():

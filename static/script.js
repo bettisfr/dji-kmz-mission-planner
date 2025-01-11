@@ -378,7 +378,7 @@ function handleAddButtonClick(waypointId, availableActions) {
 
 // Server side functions
 function getMission() {
-    fetch('/load_mission')
+    fetch('/get_mission')
         .then(response => response.json())
         .then(data => {
             renderMissionToMap(data);
