@@ -98,7 +98,7 @@ div[id^="action-"] {
 }
 
 .parameter-input {
-    width: 25%;
+    width: 35%;
     box-sizing: border-box;
     float: right;
     text-align: left;

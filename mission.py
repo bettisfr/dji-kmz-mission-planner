@@ -3,18 +3,17 @@ from geopy.distance import geodesic
 
 ACTIONS = {
     "takePhoto": {
-        "parameters": ["fileSuffix"]
+        "parameters": ["payloadPositionIndex", "fileSuffix"]
     },
     "focus": {
-        "parameters": ["focusX", "focusY"]
+        "parameters": ["payloadPositionIndex", "focusX", "focusY"]
     },
     "zoom": {
-        "parameters": ["focalLength"]
+        "parameters": ["payloadPositionIndex", "focalLength"]
     },
     "gimbalRotate": {
-        # "parameters": ["gimbalRotateMode", "gimbalPitchRotateEnable", "gimbalPitchRotateAngle",
-        #                "gimbalYawRotateEnable", "gimbalYawRotateAngle"]
-        "parameters": ["gimbalPitchRotateAngle", "gimbalYawRotateAngle"]
+        "parameters": ["payloadPositionIndex", "gimbalRotateMode", "gimbalPitchRotateEnable", "gimbalPitchRotateAngle",
+                       "gimbalYawRotateEnable", "gimbalYawRotateAngle"]
     },
     "rotateYaw": {
         "parameters": ["aircraftHeading"]
@@ -163,7 +162,7 @@ def create_mock_mission():
     mission = Mission(height=10.0, speed=5.0, payload_index=0)
 
     wp0 = Waypoint(lat=43.06229630922861, lon=12.549784090599045)
-    wp0.add_action(Action("focus", focusX=0.5, focusY=0.5))
+    wp0.add_action(Action("focus", focusX=0.5, focusY=0.5, payloadPositionIndex=0))
     wp0.add_action(Action("rotateYaw", aircraftHeading=-90))
 
     mission.add_waypoint(wp0)

@@ -132,6 +132,19 @@ function updateParameters() {
         input.type = 'text';
         input.name = param;
 
+        if (input.name === 'payloadPositionIndex') {
+            input.value = '0';
+        }
+        if (input.name === 'gimbalRotateMode') {
+            input.value = 'absoluteAngle';
+        }
+        if (input.name === 'gimbalPitchRotateEnable') {
+            input.value = '1';
+        }
+        if (input.name === 'gimbalYawRotateEnable') {
+            input.value = '1';
+        }
+
         inputGroup.appendChild(label);
         inputGroup.appendChild(input);
         container.appendChild(inputGroup);

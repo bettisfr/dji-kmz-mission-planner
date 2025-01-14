@@ -1,13 +1,13 @@
 import os
 
 from flask import Flask, render_template, jsonify, request, send_from_directory
-from mission import create_mock_mission, print_mission, Waypoint, Action, ACTIONS
+from mission import create_mock_mission, print_mission, Waypoint, Action, ACTIONS, create_empty_mission
 from parser_xml import mission_to_kmz, kmz_to_mission
 
 app = Flask(__name__)
 
 mission = create_mock_mission()
-
+# mission = create_empty_mission()
 
 # print_mission(mission)
 # mission.waypoints[3].update_waypoint_action(7, "aircraftHeading", -999)

@@ -117,7 +117,8 @@ def mission_to_kmz(mission, mission_name):
         # Add <Point>
         point = etree.SubElement(placemark, 'Point')
         coordinates = etree.SubElement(point, 'coordinates')
-        coordinates.text = f"{waypoint.lat},{waypoint.lon}"
+        # Very important: LON, LAT
+        coordinates.text = f"{waypoint.lon},{waypoint.lat}"
 
         etree.SubElement(placemark, f"{{{namespaces['wpml']}}}index").text = str(waypoint.waypoint_id)
         etree.SubElement(placemark, f"{{{namespaces['wpml']}}}executeHeight").text = str(mission.height)
@@ -195,8 +196,9 @@ def kmz_to_mission(mission_name):
     waypoints = root.xpath("//kml:Placemark", namespaces=namespaces)
     for waypoint in waypoints:
         coordinates = waypoint.xpath("kml:Point/kml:coordinates/text()", namespaces=namespaces)[0]
-        lat = float(coordinates.split(",")[0])
-        lon = float(coordinates.split(",")[1])
+        # Very important: LON, LAT
+        lat = float(coordinates.split(",")[1])
+        lon = float(coordinates.split(",")[0])
 
         wp = Waypoint(lat, lon)
 
