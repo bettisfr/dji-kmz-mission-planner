@@ -2,12 +2,13 @@
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:wpml="http://www.dji.com/wpmz/1.0.3">
   <Document>
     <wpml:missionConfig>
+      <wpml:globalRTHHeight>30</wpml:globalRTHHeight>
       <wpml:flyToWaylineMode>safely</wpml:flyToWaylineMode>
       <wpml:finishAction>goHome</wpml:finishAction>
       <wpml:exitOnRCLost>executeLostAction</wpml:exitOnRCLost>
       <wpml:executeRCLostAction>hover</wpml:executeRCLostAction>
       <wpml:takeOffSecurityHeight>10.0</wpml:takeOffSecurityHeight>
-      <wpml:globalTransitionalSpeed>15</wpml:globalTransitionalSpeed>
+      <wpml:globalTransitionalSpeed>5.0</wpml:globalTransitionalSpeed>
       <wpml:droneInfo>
         <wpml:droneEnumValue>60</wpml:droneEnumValue>
       </wpml:droneInfo>
@@ -20,16 +21,16 @@
       <wpml:templateId>0</wpml:templateId>
       <wpml:executeHeightMode>relativeToStartPoint</wpml:executeHeightMode>
       <wpml:waylineId>0</wpml:waylineId>
-      <wpml:distance>324.89</wpml:distance>
-      <wpml:duration>21.66</wpml:duration>
-      <wpml:autoFlightSpeed>15</wpml:autoFlightSpeed>
+      <wpml:distance>418.92</wpml:distance>
+      <wpml:duration>83.78</wpml:duration>
+      <wpml:autoFlightSpeed>5.0</wpml:autoFlightSpeed>
       <Placemark>
         <Point>
-          <coordinates>12.549612429222092,43.06234334089266</coordinates>
+          <coordinates>12.549784090599045,43.06229630922861</coordinates>
         </Point>
         <wpml:index>0</wpml:index>
         <wpml:executeHeight>10.0</wpml:executeHeight>
-        <wpml:waypointSpeed>15</wpml:waypointSpeed>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
         <wpml:waypointHeadingParam>
           <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
         </wpml:waypointHeadingParam>
@@ -55,6 +56,13 @@
           </wpml:action>
           <wpml:action>
             <wpml:actionId>1</wpml:actionId>
+            <wpml:actionActuatorFunc>hover</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFuncParam>
+              <wpml:hoverTime>2</wpml:hoverTime>
+            </wpml:actionActuatorFuncParam>
+          </wpml:action>
+          <wpml:action>
+            <wpml:actionId>2</wpml:actionId>
             <wpml:actionActuatorFunc>rotateYaw</wpml:actionActuatorFunc>
             <wpml:actionActuatorFuncParam>
               <wpml:aircraftHeading>90</wpml:aircraftHeading>
@@ -64,11 +72,11 @@
       </Placemark>
       <Placemark>
         <Point>
-          <coordinates>12.550368812164292,43.063762112463735</coordinates>
+          <coordinates>12.549784090599045,43.063526959224724</coordinates>
         </Point>
         <wpml:index>1</wpml:index>
         <wpml:executeHeight>10.0</wpml:executeHeight>
-        <wpml:waypointSpeed>15</wpml:waypointSpeed>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
         <wpml:waypointHeadingParam>
           <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
         </wpml:waypointHeadingParam>
@@ -91,28 +99,34 @@
             <wpml:actionActuatorFuncParam>
               <wpml:gimbalRotateMode>absoluteAngle</wpml:gimbalRotateMode>
               <wpml:gimbalPitchRotateEnable>1</wpml:gimbalPitchRotateEnable>
-              <wpml:gimbalPitchRotateAngle>0</wpml:gimbalPitchRotateAngle>
+              <wpml:gimbalPitchRotateAngle>-20</wpml:gimbalPitchRotateAngle>
               <wpml:gimbalYawRotateEnable>1</wpml:gimbalYawRotateEnable>
-              <wpml:gimbalYawRotateAngle>-90</wpml:gimbalYawRotateAngle>
+              <wpml:gimbalYawRotateAngle>45</wpml:gimbalYawRotateAngle>
               <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
             </wpml:actionActuatorFuncParam>
           </wpml:action>
           <wpml:action>
             <wpml:actionId>1</wpml:actionId>
-            <wpml:actionActuatorFunc>hover</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFunc>focus</wpml:actionActuatorFunc>
             <wpml:actionActuatorFuncParam>
-              <wpml:hoverTime>3</wpml:hoverTime>
+              <wpml:focusX>0.5</wpml:focusX>
+              <wpml:focusY>0.5</wpml:focusY>
+              <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
             </wpml:actionActuatorFuncParam>
           </wpml:action>
           <wpml:action>
             <wpml:actionId>2</wpml:actionId>
-            <wpml:actionActuatorFunc>gimbalRotate</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFunc>zoom</wpml:actionActuatorFunc>
             <wpml:actionActuatorFuncParam>
-              <wpml:gimbalRotateMode>absoluteAngle</wpml:gimbalRotateMode>
-              <wpml:gimbalPitchRotateEnable>1</wpml:gimbalPitchRotateEnable>
-              <wpml:gimbalPitchRotateAngle>0</wpml:gimbalPitchRotateAngle>
-              <wpml:gimbalYawRotateEnable>1</wpml:gimbalYawRotateEnable>
-              <wpml:gimbalYawRotateAngle>90</wpml:gimbalYawRotateAngle>
+              <wpml:focalLength>123</wpml:focalLength>
+              <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
+            </wpml:actionActuatorFuncParam>
+          </wpml:action>
+          <wpml:action>
+            <wpml:actionId>3</wpml:actionId>
+            <wpml:actionActuatorFunc>takePhoto</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFuncParam>
+              <wpml:fileSuffix>azz</wpml:fileSuffix>
               <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
             </wpml:actionActuatorFuncParam>
           </wpml:action>
@@ -120,11 +134,11 @@
       </Placemark>
       <Placemark>
         <Point>
-          <coordinates>12.55215516336821,43.06326437037518</coordinates>
+          <coordinates>12.551495339950547,43.063526959224724</coordinates>
         </Point>
         <wpml:index>2</wpml:index>
         <wpml:executeHeight>10.0</wpml:executeHeight>
-        <wpml:waypointSpeed>15</wpml:waypointSpeed>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
         <wpml:waypointHeadingParam>
           <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
         </wpml:waypointHeadingParam>
@@ -143,26 +157,84 @@
           </wpml:actionTrigger>
           <wpml:action>
             <wpml:actionId>0</wpml:actionId>
-            <wpml:actionActuatorFunc>focus</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFunc>rotateYaw</wpml:actionActuatorFunc>
             <wpml:actionActuatorFuncParam>
-              <wpml:focusX>0.5</wpml:focusX>
-              <wpml:focusY>5</wpml:focusY>
+              <wpml:aircraftHeading>-45</wpml:aircraftHeading>
+            </wpml:actionActuatorFuncParam>
+          </wpml:action>
+          <wpml:action>
+            <wpml:actionId>1</wpml:actionId>
+            <wpml:actionActuatorFunc>hover</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFuncParam>
+              <wpml:hoverTime>2</wpml:hoverTime>
+            </wpml:actionActuatorFuncParam>
+          </wpml:action>
+          <wpml:action>
+            <wpml:actionId>2</wpml:actionId>
+            <wpml:actionActuatorFunc>rotateYaw</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFuncParam>
+              <wpml:aircraftHeading>45</wpml:aircraftHeading>
+            </wpml:actionActuatorFuncParam>
+          </wpml:action>
+        </wpml:actionGroup>
+      </Placemark>
+      <Placemark>
+        <Point>
+          <coordinates>12.551495339950547,43.062241438908295</coordinates>
+        </Point>
+        <wpml:index>3</wpml:index>
+        <wpml:executeHeight>10.0</wpml:executeHeight>
+        <wpml:waypointSpeed>5.0</wpml:waypointSpeed>
+        <wpml:waypointHeadingParam>
+          <wpml:waypointHeadingMode>followWayline</wpml:waypointHeadingMode>
+        </wpml:waypointHeadingParam>
+        <wpml:waypointTurnParam>
+          <wpml:waypointTurnMode>toPointAndStopWithDiscontinuityCurvature</wpml:waypointTurnMode>
+          <wpml:waypointTurnDampingDist>0</wpml:waypointTurnDampingDist>
+        </wpml:waypointTurnParam>
+        <wpml:useStraightLine>1</wpml:useStraightLine>
+        <wpml:actionGroup>
+          <wpml:actionGroupId>3</wpml:actionGroupId>
+          <wpml:actionGroupStartIndex>3</wpml:actionGroupStartIndex>
+          <wpml:actionGroupEndIndex>3</wpml:actionGroupEndIndex>
+          <wpml:actionGroupMode>sequence</wpml:actionGroupMode>
+          <wpml:actionTrigger>
+            <wpml:actionTriggerType>reachPoint</wpml:actionTriggerType>
+          </wpml:actionTrigger>
+          <wpml:action>
+            <wpml:actionId>0</wpml:actionId>
+            <wpml:actionActuatorFunc>gimbalRotate</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFuncParam>
+              <wpml:gimbalRotateMode>absoluteAngle</wpml:gimbalRotateMode>
+              <wpml:gimbalPitchRotateEnable>1</wpml:gimbalPitchRotateEnable>
+              <wpml:gimbalPitchRotateAngle>20</wpml:gimbalPitchRotateAngle>
+              <wpml:gimbalYawRotateEnable>1</wpml:gimbalYawRotateEnable>
+              <wpml:gimbalYawRotateAngle>-45</wpml:gimbalYawRotateAngle>
               <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
             </wpml:actionActuatorFuncParam>
           </wpml:action>
           <wpml:action>
             <wpml:actionId>1</wpml:actionId>
-            <wpml:actionActuatorFunc>zoom</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFunc>focus</wpml:actionActuatorFunc>
             <wpml:actionActuatorFuncParam>
-              <wpml:focalLength>123</wpml:focalLength>
+              <wpml:focusX>0.5</wpml:focusX>
+              <wpml:focusY>0.5</wpml:focusY>
               <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
             </wpml:actionActuatorFuncParam>
           </wpml:action>
           <wpml:action>
             <wpml:actionId>2</wpml:actionId>
+            <wpml:actionActuatorFunc>zoom</wpml:actionActuatorFunc>
+            <wpml:actionActuatorFuncParam>
+              <wpml:focalLength>144</wpml:focalLength>
+              <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
+            </wpml:actionActuatorFuncParam>
+          </wpml:action>
+          <wpml:action>
+            <wpml:actionId>3</wpml:actionId>
             <wpml:actionActuatorFunc>takePhoto</wpml:actionActuatorFunc>
             <wpml:actionActuatorFuncParam>
-              <wpml:fileSuffix>azz</wpml:fileSuffix>
+              <wpml:fileSuffix>uhm</wpml:fileSuffix>
               <wpml:payloadPositionIndex>0</wpml:payloadPositionIndex>
             </wpml:actionActuatorFuncParam>
           </wpml:action>

@@ -51,6 +51,7 @@ def mission_to_kmz(mission, mission_name):
     mission_config = etree.SubElement(document_waylines, f"{{{namespaces['wpml']}}}missionConfig")
 
     # Add child elements to <wpml:missionConfig>
+    etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}globalRTHHeight").text = '30'
     etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}flyToWaylineMode").text = 'safely'
     etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}finishAction").text = 'goHome'
     etree.SubElement(mission_config, f"{{{namespaces['wpml']}}}exitOnRCLost").text = 'executeLostAction'

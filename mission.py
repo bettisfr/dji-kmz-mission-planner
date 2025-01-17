@@ -162,24 +162,36 @@ def create_mock_mission():
     mission = Mission(height=10.0, speed=5.0, payload_index=0)
 
     wp0 = Waypoint(lat=43.06229630922861, lon=12.549784090599045)
-    wp0.add_action(Action("focus", focusX=0.5, focusY=0.5, payloadPositionIndex=0))
     wp0.add_action(Action("rotateYaw", aircraftHeading=-90))
+    wp0.add_action(Action("hover", hoverTime=2))
+    wp0.add_action(Action("rotateYaw", aircraftHeading=90))
 
     mission.add_waypoint(wp0)
 
     wp1 = Waypoint(lat=43.063526959224724, lon=12.549784090599045)
-    wp1.add_action(Action("hover", hoverTime=5))
-    wp1.add_action(Action("rotateYaw", aircraftHeading=-90))
+    wp1.add_action(Action("gimbalRotate", gimbalRotateMode="absoluteAngle",
+                          gimbalPitchRotateEnable=1, gimbalPitchRotateAngle=-20,
+                          gimbalYawRotateEnable=1, gimbalYawRotateAngle=45,
+                          payloadPositionIndex=0))
+    wp1.add_action(Action("focus", focusX=0.5, focusY=0.5, payloadPositionIndex=0))
+    wp1.add_action(Action("zoom", focalLength=123, payloadPositionIndex=0))
+    wp1.add_action(Action("takePhoto", fileSuffix="azz", payloadPositionIndex=0))
     mission.add_waypoint(wp1)
 
     wp2 = Waypoint(lat=43.063526959224724, lon=12.551495339950547)
-    wp2.add_action(Action("hover", hoverTime=5))
-    wp2.add_action(Action("rotateYaw", aircraftHeading=-90))
+    wp2.add_action(Action("rotateYaw", aircraftHeading=-45))
+    wp2.add_action(Action("hover", hoverTime=2))
+    wp2.add_action(Action("rotateYaw", aircraftHeading=45))
     mission.add_waypoint(wp2)
 
     wp3 = Waypoint(lat=43.062241438908295, lon=12.551495339950547)
-    wp3.add_action(Action("hover", hoverTime=5))
-    wp3.add_action(Action("rotateYaw", aircraftHeading=-90))
+    wp3.add_action(Action("gimbalRotate", gimbalRotateMode="absoluteAngle",
+                          gimbalPitchRotateEnable=1, gimbalPitchRotateAngle=20,
+                          gimbalYawRotateEnable=1, gimbalYawRotateAngle=-45,
+                          payloadPositionIndex=0))
+    wp3.add_action(Action("focus", focusX=0.5, focusY=0.5, payloadPositionIndex=0))
+    wp3.add_action(Action("zoom", focalLength=144, payloadPositionIndex=0))
+    wp3.add_action(Action("takePhoto", fileSuffix="uhm", payloadPositionIndex=0))
     mission.add_waypoint(wp3)
 
     return mission
