@@ -118,6 +118,19 @@ class Mission:
         waypoint.actions.remove(action_del)
         self.update_ids()
 
+    def reorder_actions(self, waypoint_id: int, ordered_action_ids: List[int]) -> bool:
+        waypoint = self.waypoints[waypoint_id]
+        if len(ordered_action_ids) != len(waypoint.actions):
+            return False
+
+        action_by_id = {action.action_id: action for action in waypoint.actions}
+        if set(action_by_id.keys()) != set(ordered_action_ids):
+            return False
+
+        waypoint.actions = [action_by_id[action_id] for action_id in ordered_action_ids]
+        self.update_ids()
+        return True
+
     def update_ids(self):
         waypoint_id = 0
         for i, wp in enumerate(self.waypoints):
@@ -156,6 +169,29 @@ def print_mission(mission: Mission):
 
 def create_empty_mission():
     return Mission(height=0, speed=0, payload_index=0)
+
+
+def mission_from_dict(data):
+    height = float(data.get('height', 0))
+    speed = float(data.get('speed', 0))
+    payload_index = int(data.get('payloadIndex', data.get('payload_index', 0)))
+
+    mission = Mission(height=height, speed=speed, payload_index=payload_index)
+
+    for waypoint_data in data.get('waypoints', []):
+        lat = float(waypoint_data.get('lat'))
+        lon = float(waypoint_data.get('lon'))
+        waypoint = Waypoint(lat=lat, lon=lon)
+
+        for action_data in waypoint_data.get('actions', []):
+            action_type = action_data.get('action_type')
+            parameters = action_data.get('parameters', {})
+            waypoint.add_action(Action(action_type, **parameters))
+
+        mission.add_waypoint(waypoint)
+
+    mission.update_ids()
+    return mission
 
 
 def create_mock_mission():

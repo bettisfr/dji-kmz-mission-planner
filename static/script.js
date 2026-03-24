@@ -1,310 +1,241 @@
-// Global variables
+/* global GOOGLE_API_KEY, google, $ */
+
+// =========================
+// Globals & Constants
+// =========================
 let map;
 let polyline;
 let markers = [];
-let midlineMarkers = []
+let midlineMarkers = [];
 let availableActions = {};
 
-// Dynamically load Google Maps API script without callback in URL
+const MAP_CENTER = { lat: 43.062715, lng: 12.551034 };
+const MAP_ZOOM = 18;
+
+const MAP_STYLES = [
+    { elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#d9e3d8' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#b9d9e8' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#eef3e4' }] }
+];
+
+const POLYLINE_STYLE = {
+    strokeColor: '#ff2bd6',
+    strokeOpacity: 1.0,
+    strokeWeight: 5
+};
+
+const MIDPOINT_MARKER_STYLE = {
+    scale: 10,
+    fillColor: '#ff2bd6',
+    fillOpacity: 1,
+    strokeColor: '#7a0062',
+    strokeWeight: 2
+};
+
+const WAYPOINT_MARKER_STYLE = {
+    scale: 13,
+    fillColor: '#00c8ff',
+    fillOpacity: 1,
+    strokeColor: '#005c75',
+    strokeWeight: 2.5
+};
+
+const DEFAULT_ACTION_VALUES = {
+    payloadPositionIndex: '0',
+    gimbalRotateMode: 'absoluteAngle',
+    gimbalPitchRotateEnable: '1',
+    gimbalYawRotateEnable: '1'
+};
+
+// =========================
+// Bootstrap
+// =========================
 function loadGoogleMapsAPI() {
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=weekly`;
     script.async = true;
     script.defer = true;
-    script.onload = initMap; // Manually call initMap after the script loads
+    script.onload = initMap;
     document.head.appendChild(script);
 }
 
-// Call this function to load Google Maps API and initialize the map
 loadGoogleMapsAPI();
 
-// Map initialization function
-function initMap() {
-    console.log("Initializing Google Map...");
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: {lat: 43.062715, lng: 12.551034},
-        zoom: 18,
-        mapTypeId: google.maps.MapTypeId.SATELLITE,
-        styles: [
-            {
-                "elementType": "labels",
-                "stylers": [{"visibility": "off"}]
-            },
-            {
-                "featureType": "poi",
-                "stylers": [{"visibility": "off"}]
-            },
-            {
-                "featureType": "transit",
-                "stylers": [{"visibility": "off"}]
-            },
-            {
-                "featureType": "road",
-                "elementType": "geometry",
-                "stylers": [{"color": "#d9e3d8"}]
-            },
-            {
-                "featureType": "water",
-                "elementType": "geometry",
-                "stylers": [{"color": "#b9d9e8"}]
-            },
-            {
-                "featureType": "landscape",
-                "elementType": "geometry",
-                "stylers": [{"color": "#eef3e4"}]
-            }
-        ]
+// =========================
+// Helpers
+// =========================
+function byId(id) {
+    return document.getElementById(id);
+}
+
+function markInputDirtyAndCommit(input, onCommit) {
+    input.addEventListener('input', () => {
+        input.style.backgroundColor = '#fff3bf';
     });
 
-    // Add click listener to the map
-    map.addListener("click", function (event) {
+    input.addEventListener('blur', () => {
+        onCommit(input.value);
+        input.style.backgroundColor = '';
+    });
+}
+
+function clearMapArtifacts() {
+    markers.forEach((marker) => marker.setMap(null));
+    markers = [];
+
+    midlineMarkers.forEach((marker) => marker.setMap(null));
+    midlineMarkers = [];
+
+    if (polyline) {
+        polyline.setMap(null);
+        polyline = null;
+    }
+}
+
+function ensureOk(response, errorMessage) {
+    if (!response.ok) {
+        throw new Error(errorMessage);
+    }
+    return response;
+}
+
+function postJson(url, payload) {
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+}
+
+function refreshMission() {
+    getMission();
+}
+
+// =========================
+// Map & Rendering
+// =========================
+function initMap() {
+    console.log('Initializing Google Map...');
+
+    map = new google.maps.Map(byId('map'), {
+        center: MAP_CENTER,
+        zoom: MAP_ZOOM,
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
+        styles: MAP_STYLES
+    });
+
+    map.addListener('click', (event) => {
         addWaypoint(event.latLng);
     });
 
-    // Load the current mission from the server
-    getMission();
+    document.addEventListener('keydown', handleUndoRedoShortcuts);
 
+    refreshMission();
     addOptionsButtons();
 }
 
-function addOptionsButtons() {
-    // Add "Save" and "Load" buttons dynamically
-    const optionsDiv = document.getElementById("options");
+function renderMissionToMap(data) {
+    const globalParametersEl = byId('globalParameters');
+    const waypointsListEl = byId('waypointsList');
 
-    const saveButton = document.createElement("button");
-    saveButton.innerText = "Save";
-    saveButton.id = "saveButton";
-    saveButton.classList.add("option-button"); // Optional, for styling
-    optionsDiv.appendChild(saveButton);
+    globalParametersEl.innerHTML = '<strong>Parameters</strong>';
+    waypointsListEl.innerHTML = '<strong>Waypoints</strong>';
 
-    const loadButton = document.createElement("button");
-    loadButton.innerText = "Load";
-    loadButton.id = "loadButton";
-    loadButton.classList.add("option-button"); // Optional, for styling
-    optionsDiv.appendChild(loadButton);
-
-    // Add event listeners for buttons
-    saveButton.addEventListener("click", function () {
-        window.location.href = "/save_mission";
-    });
-
-    loadButton.addEventListener("click", function () {
-        // Dynamically create an <input type="file">
-        let fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.id = 'fileInput';
-
-        // Trigger a click event to open the file dialog
-        fileInput.click();
-
-        // When a file is selected
-        fileInput.addEventListener('change', function () {
-            loadMission(fileInput);
-        });
-    });
-}
-
-
-// Function to populate the select dropdown with action options
-function populateActionSelect() {
-    const actionSelect = document.getElementById('actionSelect');
-    actionSelect.innerHTML = ''; // Clear any existing options
-
-    // Add a default "Select an action" option
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Select an action';
-    actionSelect.appendChild(defaultOption);
-
-    // Add the action options dynamically
-    for (const action in availableActions) {
-        if (availableActions.hasOwnProperty(action)) {
-            const option = document.createElement('option');
-            option.value = action;
-            option.textContent = action;
-            actionSelect.appendChild(option);
+    Object.entries(data).forEach(([key, value]) => {
+        if (typeof value !== 'number' && typeof value !== 'string') {
+            return;
         }
-    }
 
-    // Update parameters for the first action (if any)
-    updateParameters();
-}
+        const paramElement = document.createElement('div');
+        paramElement.classList.add('actions-list');
+        paramElement.style.display = 'flex';
+        paramElement.style.alignItems = 'center';
+        paramElement.style.marginBottom = '5px';
 
-// Function to update the parameters based on the selected action
-function updateParameters() {
-    const selectedAction = document.getElementById('actionSelect').value;
-    if (!selectedAction) {
-        return;
-    }
-
-    const parameters = availableActions[selectedAction]?.parameters || [];
-    const container = document.getElementById('parametersContainer');
-
-    // Clear existing parameters
-    container.innerHTML = '';
-
-    // Dynamically add input fields for each parameter
-    parameters.forEach(param => {
-        const inputGroup = document.createElement('div');
-        inputGroup.classList.add('form-group');
-
-        const label = document.createElement('label');
-        label.textContent = param;
+        const label = document.createElement('span');
+        label.textContent = `${key}: `;
+        label.style.flex = '1';
+        label.style.fontWeight = 'bold';
+        label.style.marginRight = '10px';
 
         const input = document.createElement('input');
         input.type = 'text';
-        input.name = param;
+        input.value = value;
+        input.classList.add('parameter-input');
 
-        if (input.name === 'payloadPositionIndex') {
-            input.value = '0';
-        }
-        if (input.name === 'gimbalRotateMode') {
-            input.value = 'absoluteAngle';
-        }
-        if (input.name === 'gimbalPitchRotateEnable') {
-            input.value = '1';
-        }
-        if (input.name === 'gimbalYawRotateEnable') {
-            input.value = '1';
-        }
+        markInputDirtyAndCommit(input, (newValue) => {
+            updateGlobalParameter(key, newValue);
+        });
 
-        inputGroup.appendChild(label);
-        inputGroup.appendChild(input);
-        container.appendChild(inputGroup);
-    });
-}
-
-// Function to initialize the mission visualization
-function renderMissionToMap(data) {
-    globalParameters.innerHTML = '<strong>Parameters</strong>';
-
-    Object.entries(data).forEach(([key, value]) => {
-        // Only process scalar values (numbers or strings)
-        if (typeof value === 'number' || typeof value === 'string') {
-            const paramElement = document.createElement('div');
-            paramElement.classList.add('actions-list');
-            paramElement.style.display = 'flex';
-            paramElement.style.alignItems = 'center';
-            paramElement.style.marginBottom = '5px';
-
-            const label = document.createElement('span');
-            label.textContent = `${key}: `;
-            label.style.flex = '1';
-            label.style.fontWeight = 'bold';
-            label.style.marginRight = '10px';
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = value;
-            input.classList.add('parameter-input');
-
-            // Add an input event listener for changes
-            input.addEventListener('input', () => {
-                input.style.backgroundColor = 'lightcoral';
-            });
-
-            // Add a blur event listener to update and reset the background
-            input.addEventListener('blur', () => {
-                updateGlobalParameter(key, input.value);
-                input.style.backgroundColor = '';
-            });
-
-            paramElement.appendChild(label);
-            paramElement.appendChild(input);
-            globalParameters.appendChild(paramElement);
-        }
+        paramElement.appendChild(label);
+        paramElement.appendChild(input);
+        globalParametersEl.appendChild(paramElement);
     });
 
-    const waypointsList = document.getElementById('waypointsList');
-    waypointsList.innerHTML = '<strong>Waypoints</strong>';
+    clearMapArtifacts();
 
     const polylinePath = [];
-
-    for (var i = 0; i < markers.length; i++) {
-        markers[i].setMap(null);
-    }
-    markers.length = 0;
-
-    if (midlineMarkers) {
-        midlineMarkers.forEach(marker => marker.setMap(null));
-    }
-    midlineMarkers = [];
-
-    // Loop through each waypoint and add a marker to the map
-    data.waypoints.forEach(waypoint => {
+    data.waypoints.forEach((waypoint) => {
         addWaypointMarker(waypoint);
-        polylinePath.push({lat: waypoint.lat, lng: waypoint.lon});
         addWaypointToSidebar(waypoint);
+        polylinePath.push({ lat: waypoint.lat, lng: waypoint.lon });
     });
 
-    // Remove the previous polyline if it exists
-    if (polyline) {
-        polyline.setMap(null);
-    }
-
-    // Draw a new polyline connecting the waypoints
     if (polylinePath.length > 1) {
-        polyline = new google.maps.Polyline({
-            path: polylinePath,
-            geodesic: true,
-            strokeColor: '#ff2bd6',
-            strokeOpacity: 1.0,
-            strokeWeight: 5  // Thicker, high-contrast line for satellite view
-        });
-        polyline.setMap(map);
-
-        // Add "+" markers at the midpoints of each polyline segment
-        for (let i = 0; i < polylinePath.length - 1; i++) {
-            const midpoint = {
-                lat: (polylinePath[i].lat + polylinePath[i + 1].lat) / 2,
-                lng: (polylinePath[i].lng + polylinePath[i + 1].lng) / 2
-            };
-
-            // Thanks, ChatGPT!
-            const midMarker = new google.maps.Marker({
-                position: midpoint,
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
-                    fillColor: '#ff2bd6',
-                    fillOpacity: 1,
-                    strokeColor: '#7a0062',
-                    strokeWeight: 2
-                },
-                label: {
-                    text: '+',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: 'bold'
-                },
-                title: "Click to add a waypoint",
-            });
-
-            // Add a click event listener to the mid-marker
-            midMarker.addListener('click', () => {
-                const latLng = new google.maps.LatLng(midpoint.lat, midpoint.lng);
-                addWaypointAt(latLng, i + 1);
-            });
-
-            midlineMarkers.push(midMarker); // Store the midline marker for future cleanup
-        }
+        drawPolylineAndMidpoints(polylinePath);
     }
 }
 
-// Function to add a waypoint marker to the map
+function drawPolylineAndMidpoints(polylinePath) {
+    polyline = new google.maps.Polyline({
+        path: polylinePath,
+        geodesic: true,
+        ...POLYLINE_STYLE
+    });
+    polyline.setMap(map);
+
+    for (let i = 0; i < polylinePath.length - 1; i += 1) {
+        const midpoint = {
+            lat: (polylinePath[i].lat + polylinePath[i + 1].lat) / 2,
+            lng: (polylinePath[i].lng + polylinePath[i + 1].lng) / 2
+        };
+
+        const midMarker = new google.maps.Marker({
+            position: midpoint,
+            map,
+            icon: {
+                ...MIDPOINT_MARKER_STYLE,
+                path: google.maps.SymbolPath.CIRCLE
+            },
+            label: {
+                text: '+',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 'bold'
+            },
+            title: 'Click to add a waypoint'
+        });
+
+        midMarker.addListener('click', () => {
+            const latLng = new google.maps.LatLng(midpoint.lat, midpoint.lng);
+            addWaypointAt(latLng, i + 1);
+        });
+
+        midlineMarkers.push(midMarker);
+    }
+}
+
 function addWaypointMarker(waypoint) {
     const marker = new google.maps.Marker({
-        position: {lat: waypoint.lat, lng: waypoint.lon},
-        map: map,
+        position: { lat: waypoint.lat, lng: waypoint.lon },
+        map,
         title: `WP ${waypoint.waypoint_id}: ${waypoint.actions.length} actions`,
         icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 13,
-            fillColor: '#00c8ff',
-            fillOpacity: 1,
-            strokeColor: '#005c75',
-            strokeWeight: 2.5
+            ...WAYPOINT_MARKER_STYLE,
+            path: google.maps.SymbolPath.CIRCLE
         },
         label: {
             text: `${waypoint.waypoint_id}`,
@@ -316,60 +247,136 @@ function addWaypointMarker(waypoint) {
         draggable: true
     });
 
-    markers.push(marker);
-
-    // Listen for the marker being dragged and update the waypoint position
     marker.addListener('dragend', (event) => {
-        const newLat = event.latLng.lat();
-        const newLng = event.latLng.lng();
-
-        // Update the waypoint object with the new coordinates
-        waypoint.lat = newLat;
-        waypoint.lon = newLng;
-
+        waypoint.lat = event.latLng.lat();
+        waypoint.lon = event.latLng.lng();
         updateWaypoint(waypoint);
     });
+
+    markers.push(marker);
+}
+
+// =========================
+// Sidebar UI
+// =========================
+function addOptionsButtons() {
+    const optionsDiv = byId('options');
+
+    const saveButton = document.createElement('button');
+    saveButton.id = 'saveButton';
+    saveButton.classList.add('option-button');
+    saveButton.innerText = 'Save';
+
+    const loadButton = document.createElement('button');
+    loadButton.id = 'loadButton';
+    loadButton.classList.add('option-button');
+    loadButton.innerText = 'Load';
+
+    const undoButton = document.createElement('button');
+    undoButton.id = 'undoButton';
+    undoButton.classList.add('option-button');
+    undoButton.innerText = 'Undo';
+
+    const redoButton = document.createElement('button');
+    redoButton.id = 'redoButton';
+    redoButton.classList.add('option-button');
+    redoButton.innerText = 'Redo';
+
+    saveButton.addEventListener('click', () => {
+        window.location.href = '/save_mission';
+    });
+
+    loadButton.addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.id = 'fileInput';
+        fileInput.click();
+
+        fileInput.addEventListener('change', () => {
+            loadMission(fileInput);
+        });
+    });
+
+    undoButton.addEventListener('click', () => {
+        undoMission();
+    });
+
+    redoButton.addEventListener('click', () => {
+        redoMission();
+    });
+
+    optionsDiv.appendChild(saveButton);
+    optionsDiv.appendChild(loadButton);
+    optionsDiv.appendChild(undoButton);
+    optionsDiv.appendChild(redoButton);
+}
+
+function handleUndoRedoShortcuts(event) {
+    const target = event.target;
+    const isTypingField = target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+    if (isTypingField) {
+        return;
+    }
+
+    const modifierPressed = event.ctrlKey || event.metaKey;
+    if (!modifierPressed) {
+        return;
+    }
+
+    const key = event.key.toLowerCase();
+    if (key === 'z' && !event.shiftKey) {
+        event.preventDefault();
+        undoMission();
+        return;
+    }
+
+    if ((key === 'z' && event.shiftKey) || key === 'y') {
+        event.preventDefault();
+        redoMission();
+    }
 }
 
 function addWaypointToSidebar(waypoint) {
-    const waypointsList = document.getElementById('waypointsList');
+    const waypointsListEl = byId('waypointsList');
+
     const waypointElement = document.createElement('div');
     waypointElement.id = `waypoint-${waypoint.waypoint_id}`;
-    const lat_fixed = waypoint.lat.toFixed(6);
-    const lon_fixed = waypoint.lon.toFixed(6);
-    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: (${lat_fixed}, ${lon_fixed})</b> <b><a href="#" class="remove-waypoint">del</a></b>`;
 
-    // Add listener for showing a popup when removing a waypoint
-    waypointElement.querySelector('.remove-waypoint').addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent triggering the waypoint onclick event
+    const latFixed = waypoint.lat.toFixed(6);
+    const lonFixed = waypoint.lon.toFixed(6);
+    waypointElement.innerHTML = `<b>${waypoint.waypoint_id}: (${latFixed}, ${lonFixed})</b> <b><a href="#" class="remove-waypoint">del</a></b>`;
+
+    waypointElement.querySelector('.remove-waypoint').addEventListener('click', (event) => {
+        event.stopPropagation();
         removeWaypoint(waypoint.waypoint_id);
     });
 
-    // Create a section to list actions for the waypoint
     const actionsList = document.createElement('div');
     actionsList.classList.add('actions-list');
     actionsList.innerHTML = '<u><b>Actions</b></u> <b><a href="#" class="add-action">add</a></b>';
+    const actionItemsContainer = document.createElement('div');
+    actionItemsContainer.classList.add('action-items');
 
-    // Listener for adding a new action
-    actionsList.querySelector('.add-action').addEventListener('click', (e) => {
-        e.stopPropagation();
+    actionsList.querySelector('.add-action').addEventListener('click', (event) => {
+        event.stopPropagation();
         getAvailableActions(waypoint.waypoint_id);
     });
 
-    // Populate the list of actions
-    waypoint.actions.forEach(action => {
+    waypoint.actions.forEach((action) => {
         const actionElement = document.createElement('div');
         actionElement.id = `action-${waypoint.waypoint_id}-${action.action_id}`;
+        actionElement.dataset.actionId = `${action.action_id}`;
+        actionElement.classList.add('action-draggable');
         actionElement.innerHTML = `<b>${action.action_id} - ${action.action_type}</b> <b><a href="#" class="remove-action">del</a></b>`;
 
-        // Listener for removing an action
-        actionElement.querySelector('.remove-action').addEventListener('click', (e) => {
-            e.stopPropagation();
+        actionElement.querySelector('.remove-action').addEventListener('click', (event) => {
+            event.stopPropagation();
             removeAction(waypoint.waypoint_id, action.action_id);
         });
 
         const parametersList = document.createElement('div');
-        for (const [param, value] of Object.entries(action.parameters)) {
+        Object.entries(action.parameters).forEach(([param, value]) => {
             const paramElement = document.createElement('div');
             paramElement.style.display = 'flex';
 
@@ -383,309 +390,352 @@ function addWaypointToSidebar(waypoint) {
             input.value = value;
             input.classList.add('parameter-input');
 
-            // Add an input event listener for changes
-            input.addEventListener('input', () => {
-                input.style.backgroundColor = 'lightcoral';
-            });
-
-            // Add a blur event listener to detect when the input loses focus
-            input.addEventListener('blur', () => {
-                const [_, waypointId, actionId] = actionElement.id.split('-');
-                updateAction(waypointId, actionId, param, input.value);
-                input.style.backgroundColor = '';
+            markInputDirtyAndCommit(input, (newValue) => {
+                const [, waypointId, actionId] = actionElement.id.split('-');
+                updateAction(waypointId, actionId, param, newValue);
             });
 
             paramElement.appendChild(label);
             paramElement.appendChild(input);
-
             parametersList.appendChild(paramElement);
-        }
+        });
 
         actionElement.appendChild(parametersList);
-        actionsList.appendChild(actionElement);
+        actionItemsContainer.appendChild(actionElement);
     });
 
+    actionsList.appendChild(actionItemsContainer);
+    enableActionSorting(actionItemsContainer, waypoint.waypoint_id);
     waypointElement.appendChild(actionsList);
-    waypointsList.appendChild(waypointElement);
+    waypointsListEl.appendChild(waypointElement);
 }
 
-function handleAddButtonClick(waypointId, availableActions) {
-    const selectedAction = document.getElementById('actionSelect').value;
-    const parameters = availableActions[selectedAction]?.parameters || [];
-    const params = {};
+function enableActionSorting(actionItemsContainer, waypointId) {
+    if (typeof $ === 'undefined' || !$.fn.sortable) {
+        return;
+    }
 
-    // Collect the values of the parameters
-    parameters.forEach(param => {
+    $(actionItemsContainer).sortable({
+        items: '> div[id^="action-"]',
+        axis: 'y',
+        tolerance: 'pointer',
+        placeholder: 'action-sort-placeholder',
+        cancel: 'input, textarea, select, a, button',
+        update() {
+            const orderedActionIds = Array.from(
+                actionItemsContainer.querySelectorAll('div[id^="action-"]')
+            )
+                .map((el) => Number.parseInt(el.dataset.actionId, 10))
+                .filter((id) => Number.isInteger(id));
+
+            reorderActions(waypointId, orderedActionIds);
+        }
+    });
+}
+
+function populateActionSelect() {
+    const actionSelect = byId('actionSelect');
+    actionSelect.innerHTML = '';
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select an action';
+    actionSelect.appendChild(defaultOption);
+
+    Object.keys(availableActions).forEach((action) => {
+        const option = document.createElement('option');
+        option.value = action;
+        option.textContent = action;
+        actionSelect.appendChild(option);
+    });
+
+    updateParameters();
+}
+
+function updateParameters() {
+    const selectedAction = byId('actionSelect').value;
+    const container = byId('parametersContainer');
+    container.innerHTML = '';
+
+    if (!selectedAction) {
+        return;
+    }
+
+    const parameters = availableActions[selectedAction]?.parameters || [];
+
+    parameters.forEach((param) => {
+        const inputGroup = document.createElement('div');
+        inputGroup.classList.add('form-group');
+
+        const label = document.createElement('label');
+        label.textContent = param;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = param;
+
+        if (DEFAULT_ACTION_VALUES[param] !== undefined) {
+            input.value = DEFAULT_ACTION_VALUES[param];
+        }
+
+        inputGroup.appendChild(label);
+        inputGroup.appendChild(input);
+        container.appendChild(inputGroup);
+    });
+}
+
+function handleAddButtonClick(waypointId) {
+    const selectedAction = byId('actionSelect').value;
+    if (!selectedAction) {
+        return;
+    }
+
+    const params = {};
+    const parameters = availableActions[selectedAction]?.parameters || [];
+
+    parameters.forEach((param) => {
         const input = document.querySelector(`[name=${param}]`);
         if (input) {
             params[param] = input.value;
         }
     });
 
-    if (!selectedAction) {
-        return;
-    }
-
     addAction(waypointId, selectedAction, params);
-
-    // Close the dialog after adding the action
-    $("#popup").dialog("close");
-
-    // TODO: hide
+    $('#popup').dialog('close');
 }
 
-// Server side functions
+// =========================
+// API Calls
+// =========================
 function getMission() {
     fetch('/get_mission')
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => ensureOk(response, 'Failed to get mission from server.'))
+        .then((response) => response.json())
+        .then((data) => {
             renderMissionToMap(data);
         })
-        .catch(error => console.error('Error loading mission:', error));
+        .catch((error) => {
+            console.error('Error loading mission:', error);
+        });
 }
 
 function loadMission(fileInput) {
-    let formData = new FormData();
+    if (fileInput.files.length <= 0) {
+        alert('Please select a file to upload');
+        return;
+    }
 
-    if (fileInput.files.length > 0) {
-        formData.append('file', fileInput.files[0]);
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
 
-        fetch('/load_mission', {
-            method: 'POST',
-            body: formData
-        }).then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to load mission on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
+    fetch('/load_mission', {
+        method: 'POST',
+        body: formData
+    })
+        .then((response) => ensureOk(response, 'Failed to load mission on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log(data.message);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error loading mission:', error);
         });
-    } else {
-        alert('Please select a file to upload');
-    }
 }
 
 function getAvailableActions(waypointId) {
     fetch('/available_actions')
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => ensureOk(response, 'Failed to retrieve available actions.'))
+        .then((response) => response.json())
+        .then((data) => {
             availableActions = data;
-            populateActionSelect(data);
+            populateActionSelect();
 
-            $("#popup").dialog({
+            $('#popup').dialog({
                 modal: true,
-                width: "30%",
-                height: "auto",
+                width: '30%',
+                height: 'auto',
                 buttons: {
-                    "Add": function () {
-                        handleAddButtonClick(waypointId, availableActions);
+                    Add() {
+                        handleAddButtonClick(waypointId);
                     }
                 }
             });
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error retrieving available actions:', error);
         });
 }
 
-function addWaypoint(latLng) {
-    const lat = latLng.lat();
-    const lon = latLng.lng();
-
-    fetch('/add_waypoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({lat, lon})
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to add waypoint on server.');
+function undoMission() {
+    fetch('/undo', { method: 'POST' })
+        .then((response) => ensureOk(response, 'Nothing to undo'))
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.mission) {
+                renderMissionToMap(data.mission);
+            } else {
+                refreshMission();
             }
-            return response.json();
         })
-        .then(data => {
+        .catch((error) => {
+            console.warn('Undo not applied:', error.message);
+        });
+}
+
+function redoMission() {
+    fetch('/redo', { method: 'POST' })
+        .then((response) => ensureOk(response, 'Nothing to redo'))
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.mission) {
+                renderMissionToMap(data.mission);
+            } else {
+                refreshMission();
+            }
+        })
+        .catch((error) => {
+            console.warn('Redo not applied:', error.message);
+        });
+}
+
+function addWaypoint(latLng) {
+    const payload = { lat: latLng.lat(), lon: latLng.lng() };
+
+    postJson('/add_waypoint', payload)
+        .then((response) => ensureOk(response, 'Failed to add waypoint on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log(data.message);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error adding waypoint:', error);
         });
 }
 
 function addWaypointAt(latLng, index) {
-    const lat = latLng.lat();
-    const lon = latLng.lng();
+    const payload = { lat: latLng.lat(), lon: latLng.lng(), index };
 
-    fetch('/add_waypoint_at', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({lat, lon, index})
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to add waypoint on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
+    postJson('/add_waypoint_at', payload)
+        .then((response) => ensureOk(response, 'Failed to add waypoint on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log(data.message);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error adding waypoint at:', error);
         });
 }
 
 function updateWaypoint(waypoint) {
-    fetch('/update_waypoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypoint.waypoint_id,
-            lat: waypoint.lat,
-            lon: waypoint.lon
-        })
+    postJson('/update_waypoint', {
+        waypoint_id: waypoint.waypoint_id,
+        lat: waypoint.lat,
+        lon: waypoint.lon
     })
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => ensureOk(response, 'Failed to update waypoint on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log('Waypoint updated on server:', data);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error updating waypoint on server:', error);
         });
 }
 
 function updateGlobalParameter(variable, value) {
-    fetch('/update_global_parameter', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            variable: variable,
-            value: value
-        })
-    })
-        .then(response => response.json())
-        .then(data => {
+    postJson('/update_global_parameter', { variable, value })
+        .then((response) => ensureOk(response, 'Failed to update global parameter on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log('Global parameter updated on server:', data);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error updating global parameter on server:', error);
         });
 }
 
 function updateAction(waypointId, actionId, param, value) {
-    fetch('/update_action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypointId,
-            action_id: actionId,
-            action_type: param,
-            parameter: value
-        })
+    postJson('/update_action', {
+        waypoint_id: waypointId,
+        action_id: actionId,
+        action_type: param,
+        parameter: value
     })
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => ensureOk(response, 'Failed to update action on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log('Action updated on server:', data);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error updating action on server:', error);
         });
 }
 
 function removeWaypoint(waypointId) {
-    fetch('/remove_waypoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypointId
-        })
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to remove waypoint on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
+    postJson('/remove_waypoint', { waypoint_id: waypointId })
+        .then((response) => ensureOk(response, 'Failed to remove waypoint on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log(data.message);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error removing waypoint:', error);
         });
 }
 
 function addAction(waypointId, actionType, parameters) {
-    fetch('/add_action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypointId,
-            action_type: actionType,
-            parameters: parameters
-        })
+    postJson('/add_action', {
+        waypoint_id: waypointId,
+        action_type: actionType,
+        parameters
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to add action on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
+        .then((response) => ensureOk(response, 'Failed to add action on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log(data.message);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error adding action:', error);
         });
 }
 
 function removeAction(waypointId, actionId) {
-    fetch('/remove_action', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            waypoint_id: waypointId,
-            action_id: actionId
-        })
+    postJson('/remove_action', {
+        waypoint_id: waypointId,
+        action_id: actionId
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to remove action on server.');
-            }
-            return response.json();
-        })
-        .then(data => {
+        .then((response) => ensureOk(response, 'Failed to remove action on server.'))
+        .then((response) => response.json())
+        .then((data) => {
             console.log(data.message);
-            getMission();
+            refreshMission();
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Error removing action:', error);
+        });
+}
+
+function reorderActions(waypointId, actionIds) {
+    postJson('/reorder_actions', {
+        waypoint_id: waypointId,
+        action_ids: actionIds
+    })
+        .then((response) => ensureOk(response, 'Failed to reorder actions on server.'))
+        .then((response) => response.json())
+        .then((data) => {
+            console.log(data.message);
+            refreshMission();
+        })
+        .catch((error) => {
+            console.error('Error reordering actions:', error);
+            refreshMission();
         });
 }
