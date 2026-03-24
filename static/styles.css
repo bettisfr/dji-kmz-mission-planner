@@ -1,125 +1,371 @@
+:root {
+    --font-sans: "Source Sans 3", sans-serif;
+    --font-display: "Space Grotesk", sans-serif;
+
+    --ui-bg: #f5f5dc;
+    --ui-surface: #fdfcf7;
+    --ui-surface-soft: #eef4ef;
+    --ui-border: #d8e6ef;
+    --ui-shadow: 0 14px 34px rgba(20, 43, 35, 0.12);
+
+    --ui-text: #132432;
+    --ui-muted: #3d5a6b;
+    --ui-accent: #2f7f49;
+    --ui-accent-soft: #e7f4ea;
+    --ui-danger: #b53333;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body.planner-page {
+    margin: 0;
+    height: 100vh;
+    background: radial-gradient(circle at 10% 10%, #ffffff 0%, var(--ui-bg) 40%, #ece8d4 100%);
+    color: var(--ui-text);
+    font-family: var(--font-sans);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(11, 30, 43, 0.9);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(4px);
+    padding: 14px 20px;
+}
+
+.brand-block h1 {
+    margin: 0;
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-size: 1.22rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.brand-block p {
+    margin: 3px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.9rem;
+}
+
+.layout-shell {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 14px;
+    padding: 14px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.map-panel {
+    border-radius: 16px;
+    border: 1px solid var(--ui-border);
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow);
+    overflow: hidden;
+    min-height: 0;
+}
+
 #map {
-    margin: 10px;
-    width: 78%;
-    height: 95vh;
-    float: left;
+    width: 100%;
+    height: 100%;
 }
 
 #sidebar {
-    margin: 10px;
-    width: 20%;
-    height: 95vh;
-    padding: 10px;
+    min-height: 0;
     overflow-y: auto;
-    background-color: #f4f4f4;
-    float: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 2px;
 }
 
-#waypointsList {
-    margin-top: 20px;
+.panel-card {
+    background: var(--ui-surface);
+    border: 1px solid var(--ui-border);
+    border-radius: 14px;
+    box-shadow: var(--ui-shadow);
+    padding: 12px;
 }
 
+.panel-card h2,
+#globalParameters strong,
 #waypointsList strong {
     display: block;
-    margin-bottom: 10px;
-    font-size: 18px;
+    margin: 0 0 10px;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f4c2f;
 }
 
-#waypointsList div {
-    border-radius: 5px;
+.panel-card p {
+    margin: 0;
+    color: var(--ui-muted);
 }
 
-#waypointsList div:hover {
-    background-color: #eaeaea;
+#options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
 
-#globalParameters {
-    margin-top: 20px;
+button,
+.option-button {
+    border: 1px solid #c0d4c7;
+    background: linear-gradient(180deg, #f8fcf9 0%, #e5efe8 100%);
+    color: #1f4c2f;
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    font-weight: 700;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 
-#globalParameters strong {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 18px;
+button:hover,
+.option-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(47, 127, 73, 0.18);
+    border-color: #9dc3ab;
 }
 
-#globalParameters div {
-    border-radius: 5px;
-}
-
-#globalParameters div:hover {
-    background-color: #eaeaea;
-}
-
-.waypoint-coordinates {
-    border: 1px solid #ccc;
+#globalParameters div,
+#waypointsList div,
+div[id^="waypoint-"],
+div[id^="action-"] {
+    border-radius: 10px;
 }
 
 div[id^="waypoint-"] {
-  padding: 10px;
-  margin-bottom: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #dbe8e0;
+    background: #f9fcfa;
+    padding: 10px;
 }
 
-div[id^="action-"] {
-  padding-top: 5px;
+div[id^="waypoint-"] > b {
+    font-size: 0.94rem;
+}
+
+.waypoint-coordinates {
+    border: 1px solid #d5dfd8;
 }
 
 .actions-list {
     margin-top: 10px;
-    padding-left: 15px;
+    padding: 8px;
+    border-radius: 10px;
+    background: var(--ui-surface-soft);
 }
 
-.action-item {
-    margin-bottom: 5px;
-    padding-left: 10px;
-    border-left: 2px solid #ccc;
+.action-item,
+div[id^="action-"] {
+    margin-top: 8px;
+    padding: 8px;
+    border-left: 2px solid #93b5a1;
+    background: #f7fbf8;
+}
+
+.add-action,
+.remove-action,
+.remove-waypoint {
+    text-decoration: none;
+    font-weight: 700;
+    padding-left: 8px;
 }
 
 .add-action {
-    color: green;
-    text-decoration: none;
-    padding-left: 10px;
-    font-weight: bold;
+    color: var(--ui-accent);
 }
 
-.remove-action, .remove-waypoint {
-    color: red;
-    text-decoration: none;
-    padding-left: 10px;
-    font-weight: bold;
+.remove-action,
+.remove-waypoint {
+    color: var(--ui-danger);
 }
 
-.add-action:hover {
-    text-decoration: underline;
-}
-
-.remove-action:hover, .remove-waypoint:hover {
+.add-action:hover,
+.remove-action:hover,
+.remove-waypoint:hover {
     text-decoration: underline;
 }
 
 .parameter-input {
-    width: 35%;
-    box-sizing: border-box;
-    float: right;
+    width: auto;
+    min-width: 96px;
+    border: 1px solid #c9d9ce;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 4px 7px;
     text-align: left;
+    color: var(--ui-text);
+    font-family: var(--font-sans);
 }
 
-body {
-    margin: 0;
-    padding: 0;
+.parameter-input:focus {
+    outline: 2px solid #b5dbc3;
+    border-color: #8db89c;
+}
+
+#globalParameters .actions-list {
+    padding: 6px 8px;
+}
+
+#globalParameters .actions-list span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+#globalParameters .parameter-input {
+    flex: 0 0 120px;
+    width: 120px;
+    min-width: 120px;
+}
+
+div[id^="action-"] > div > div {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+}
+
+div[id^="action-"] > div > div > span {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+div[id^="action-"] > div > div > input.parameter-input {
+    flex: 0 0 120px;
+    width: 120px;
+    min-width: 120px;
 }
 
 #popup {
     display: none;
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
+    padding: 8px;
 }
 
-select {
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #1f4c2f;
+}
+
+select,
+.form-group input {
     width: 100%;
-    padding: 8px;
-    margin-top: 5px;
+    border: 1px solid #c9d9ce;
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 7px 8px;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+}
+
+.ui-dialog {
+    border-radius: 14px;
+    border: 1px solid var(--ui-border);
+    box-shadow: 0 18px 40px rgba(16, 48, 31, 0.26);
+    overflow: hidden;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    background: rgba(11, 30, 43, 0.9);
+    border: none;
+    color: #ffffff;
+    padding: 10px 12px;
+}
+
+.ui-dialog .ui-dialog-title {
+    font-family: var(--font-display);
+    font-size: 0.98rem;
+    font-weight: 700;
+}
+
+.ui-widget.ui-widget-content {
+    border: 1px solid #d8e6ef;
+}
+
+.ui-dialog .ui-dialog-content {
+    background: #fdfcf7;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+    border-top: 1px solid #dce7e0;
+    background: #f3f7f4;
+}
+
+.ui-dialog .ui-dialog-buttonpane button {
+    margin: 0.3em 0.4em;
+}
+
+@media (max-width: 1120px) {
+    .layout-shell {
+        grid-template-columns: 1fr;
+    }
+
+    #map {
+        height: 56vh;
+    }
+
+    #sidebar {
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .topbar {
+        padding: 12px 14px;
+    }
+
+    .brand-block h1 {
+        font-size: 1.08rem;
+    }
+
+    .brand-block p {
+        font-size: 0.82rem;
+    }
+
+    .layout-shell {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    #options {
+        grid-template-columns: 1fr;
+    }
+
+    #globalParameters .parameter-input,
+    div[id^="action-"] > div > div > input.parameter-input {
+        flex-basis: 104px;
+        width: 104px;
+        min-width: 104px;
+    }
+
+    div[id^="action-"] > div > div > span {
+        white-space: normal;
+    }
 }

@@ -29,6 +29,29 @@ function initMap() {
             {
                 "elementType": "labels",
                 "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "poi",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "transit",
+                "stylers": [{"visibility": "off"}]
+            },
+            {
+                "featureType": "road",
+                "elementType": "geometry",
+                "stylers": [{"color": "#d9e3d8"}]
+            },
+            {
+                "featureType": "water",
+                "elementType": "geometry",
+                "stylers": [{"color": "#b9d9e8"}]
+            },
+            {
+                "featureType": "landscape",
+                "elementType": "geometry",
+                "stylers": [{"color": "#eef3e4"}]
             }
         ]
     });
@@ -224,9 +247,9 @@ function renderMissionToMap(data) {
         polyline = new google.maps.Polyline({
             path: polylinePath,
             geodesic: true,
-            strokeColor: '#0000FF',  // Blue color
+            strokeColor: '#ff2bd6',
             strokeOpacity: 1.0,
-            strokeWeight: 4  // Thick line
+            strokeWeight: 5  // Thicker, high-contrast line for satellite view
         });
         polyline.setMap(map);
 
@@ -244,9 +267,9 @@ function renderMissionToMap(data) {
                 icon: {
                     path: google.maps.SymbolPath.CIRCLE,
                     scale: 10,
-                    fillColor: 'green',
+                    fillColor: '#ff2bd6',
                     fillOpacity: 1,
-                    strokeColor: 'green',
+                    strokeColor: '#7a0062',
                     strokeWeight: 2
                 },
                 label: {
@@ -275,8 +298,21 @@ function addWaypointMarker(waypoint) {
         position: {lat: waypoint.lat, lng: waypoint.lon},
         map: map,
         title: `WP ${waypoint.waypoint_id}: ${waypoint.actions.length} actions`,
-        label: `${waypoint.waypoint_id}`,
-        labelOrigin: new google.maps.Point(0, 0),
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 13,
+            fillColor: '#00c8ff',
+            fillOpacity: 1,
+            strokeColor: '#005c75',
+            strokeWeight: 2.5
+        },
+        label: {
+            text: `${waypoint.waypoint_id}`,
+            color: '#ffffff',
+            fontSize: '12px',
+            fontWeight: '700'
+        },
+        labelOrigin: new google.maps.Point(0, 1),
         draggable: true
     });
 
