@@ -23,7 +23,21 @@ redo_stack = []
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template(
+        'index.html',
+        google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY', '')
+    )
+
+
+@app.route('/google_maps_config.js')
+def google_maps_config():
+    response = app.make_response(render_template(
+        'google_maps_config.js',
+        google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY', '')
+    ))
+    response.mimetype = 'application/javascript'
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @app.route('/get_mission')

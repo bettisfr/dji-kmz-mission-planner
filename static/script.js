@@ -1,4 +1,4 @@
-/* global GOOGLE_API_KEY, google, $ */
+/* global google, $ */
 
 // =========================
 // Globals & Constants
@@ -54,8 +54,13 @@ const DEFAULT_ACTION_VALUES = {
 // Bootstrap
 // =========================
 function loadGoogleMapsAPI() {
+    const apiKey = window.GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+        console.error('Google Maps API key is missing. Set GOOGLE_MAPS_API_KEY in the server environment.');
+        return;
+    }
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&v=weekly`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly`;
     script.async = true;
     script.defer = true;
     script.onload = initMap;
