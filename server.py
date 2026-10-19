@@ -23,17 +23,14 @@ redo_stack = []
 
 @app.route('/')
 def index():
-    return render_template(
-        'index.html',
-        google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY', '')
-    )
+    return render_template('index.html')
 
 
-@app.route('/google_maps_config.js')
-def google_maps_config():
+@app.route('/map_config.js')
+def map_config():
     response = app.make_response(render_template(
-        'google_maps_config.js',
-        google_maps_api_key=os.environ.get('GOOGLE_MAPS_API_KEY', '')
+        'map_config.js',
+        maptiler_api_key=os.environ.get('MAPTILER_WEB_API_KEY', '')
     ))
     response.mimetype = 'application/javascript'
     response.headers['Cache-Control'] = 'no-store'

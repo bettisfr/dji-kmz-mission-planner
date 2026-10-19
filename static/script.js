@@ -1,10 +1,9 @@
-/* global google, $ */
+/* global maplibregl, $ */
 
 // =========================
 // Globals & Constants
 // =========================
 let map;
-let polyline;
 let markers = [];
 let midlineMarkers = [];
 let availableActions = {};
@@ -12,36 +11,8 @@ let availableActions = {};
 const MAP_CENTER = { lat: 43.062715, lng: 12.551034 };
 const MAP_ZOOM = 18;
 
-const MAP_STYLES = [
-    { elementType: 'labels', stylers: [{ visibility: 'off' }] },
-    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#d9e3d8' }] },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#b9d9e8' }] },
-    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#eef3e4' }] }
-];
-
-const POLYLINE_STYLE = {
-    strokeColor: '#ff2bd6',
-    strokeOpacity: 1.0,
-    strokeWeight: 5
-};
-
-const MIDPOINT_MARKER_STYLE = {
-    scale: 10,
-    fillColor: '#ff2bd6',
-    fillOpacity: 1,
-    strokeColor: '#7a0062',
-    strokeWeight: 2
-};
-
-const WAYPOINT_MARKER_STYLE = {
-    scale: 13,
-    fillColor: '#00c8ff',
-    fillOpacity: 1,
-    strokeColor: '#005c75',
-    strokeWeight: 2.5
-};
+const ROUTE_SOURCE_ID = 'mission-route-source';
+const ROUTE_LAYER_ID = 'mission-route-layer';
 
 const DEFAULT_ACTION_VALUES = {
     payloadPositionIndex: '0',
@@ -53,21 +24,39 @@ const DEFAULT_ACTION_VALUES = {
 // =========================
 // Bootstrap
 // =========================
-function loadGoogleMapsAPI() {
-    const apiKey = window.GOOGLE_MAPS_API_KEY;
+function initMap() {
+    const apiKey = window.MAPTILER_WEB_API_KEY;
     if (!apiKey) {
-        console.error('Google Maps API key is missing. Set GOOGLE_MAPS_API_KEY in the server environment.');
+        console.error('MapTiler key is missing. Set MAPTILER_WEB_API_KEY in the server environment.');
+        showMapError('Map key missing. Set MAPTILER_WEB_API_KEY on the server.');
         return;
     }
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly`;
-    script.async = true;
-    script.defer = true;
-    script.onload = initMap;
-    document.head.appendChild(script);
+
+    map = new maplibregl.Map({
+        container: byId('map'),
+        style: `https://api.maptiler.com/maps/satellite/style.json?key=${encodeURIComponent(apiKey)}`,
+        center: [MAP_CENTER.lng, MAP_CENTER.lat],
+        zoom: MAP_ZOOM,
+        attributionControl: true
+    });
+    map.addControl(new maplibregl.NavigationControl(), 'top-right');
+    map.on('click', (event) => addWaypoint(event.lngLat));
+    map.on('load', () => {
+        document.addEventListener('keydown', handleUndoRedoShortcuts);
+        refreshMission();
+        addOptionsButtons();
+    });
+    map.on('error', (event) => console.error('MapLibre error:', event.error));
 }
 
-loadGoogleMapsAPI();
+function showMapError(message) {
+    const error = document.createElement('div');
+    error.className = 'map-error';
+    error.textContent = message;
+    byId('map').appendChild(error);
+}
+
+initMap();
 
 // =========================
 // Helpers
@@ -88,15 +77,17 @@ function markInputDirtyAndCommit(input, onCommit) {
 }
 
 function clearMapArtifacts() {
-    markers.forEach((marker) => marker.setMap(null));
+    markers.forEach((marker) => marker.remove());
     markers = [];
 
-    midlineMarkers.forEach((marker) => marker.setMap(null));
+    midlineMarkers.forEach((marker) => marker.remove());
     midlineMarkers = [];
 
-    if (polyline) {
-        polyline.setMap(null);
-        polyline = null;
+    if (map?.getLayer(ROUTE_LAYER_ID)) {
+        map.removeLayer(ROUTE_LAYER_ID);
+    }
+    if (map?.getSource(ROUTE_SOURCE_ID)) {
+        map.removeSource(ROUTE_SOURCE_ID);
     }
 }
 
@@ -122,26 +113,6 @@ function refreshMission() {
 // =========================
 // Map & Rendering
 // =========================
-function initMap() {
-    console.log('Initializing Google Map...');
-
-    map = new google.maps.Map(byId('map'), {
-        center: MAP_CENTER,
-        zoom: MAP_ZOOM,
-        mapTypeId: google.maps.MapTypeId.SATELLITE,
-        styles: MAP_STYLES
-    });
-
-    map.addListener('click', (event) => {
-        addWaypoint(event.latLng);
-    });
-
-    document.addEventListener('keydown', handleUndoRedoShortcuts);
-
-    refreshMission();
-    addOptionsButtons();
-}
-
 function renderMissionToMap(data) {
     const globalParametersEl = byId('globalParameters');
     const waypointsListEl = byId('waypointsList');
@@ -186,7 +157,7 @@ function renderMissionToMap(data) {
     data.waypoints.forEach((waypoint) => {
         addWaypointMarker(waypoint);
         addWaypointToSidebar(waypoint);
-        polylinePath.push({ lat: waypoint.lat, lng: waypoint.lon });
+        polylinePath.push([waypoint.lon, waypoint.lat]);
     });
 
     if (polylinePath.length > 1) {
@@ -195,66 +166,61 @@ function renderMissionToMap(data) {
 }
 
 function drawPolylineAndMidpoints(polylinePath) {
-    polyline = new google.maps.Polyline({
-        path: polylinePath,
-        geodesic: true,
-        ...POLYLINE_STYLE
+    map.addSource(ROUTE_SOURCE_ID, {
+        type: 'geojson',
+        data: {
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'LineString', coordinates: polylinePath }
+        }
     });
-    polyline.setMap(map);
+    map.addLayer({
+        id: ROUTE_LAYER_ID,
+        type: 'line',
+        source: ROUTE_SOURCE_ID,
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#ff2bd6', 'line-opacity': 1, 'line-width': 5 }
+    });
 
     for (let i = 0; i < polylinePath.length - 1; i += 1) {
         const midpoint = {
-            lat: (polylinePath[i].lat + polylinePath[i + 1].lat) / 2,
-            lng: (polylinePath[i].lng + polylinePath[i + 1].lng) / 2
+            lng: (polylinePath[i][0] + polylinePath[i + 1][0]) / 2,
+            lat: (polylinePath[i][1] + polylinePath[i + 1][1]) / 2
         };
 
-        const midMarker = new google.maps.Marker({
-            position: midpoint,
-            map,
-            icon: {
-                ...MIDPOINT_MARKER_STYLE,
-                path: google.maps.SymbolPath.CIRCLE
-            },
-            label: {
-                text: '+',
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: 'bold'
-            },
-            title: 'Click to add a waypoint'
+        const element = document.createElement('button');
+        element.type = 'button';
+        element.className = 'map-midpoint-marker';
+        element.textContent = '+';
+        element.title = 'Click to add a waypoint';
+        element.setAttribute('aria-label', 'Add waypoint here');
+        element.addEventListener('click', (event) => {
+            event.stopPropagation();
+            addWaypointAt(midpoint, i + 1);
         });
 
-        midMarker.addListener('click', () => {
-            const latLng = new google.maps.LatLng(midpoint.lat, midpoint.lng);
-            addWaypointAt(latLng, i + 1);
-        });
-
+        const midMarker = new maplibregl.Marker({ element, anchor: 'center' })
+            .setLngLat([midpoint.lng, midpoint.lat])
+            .addTo(map);
         midlineMarkers.push(midMarker);
     }
 }
 
 function addWaypointMarker(waypoint) {
-    const marker = new google.maps.Marker({
-        position: { lat: waypoint.lat, lng: waypoint.lon },
-        map,
-        title: `WP ${waypoint.waypoint_id}: ${waypoint.actions.length} actions`,
-        icon: {
-            ...WAYPOINT_MARKER_STYLE,
-            path: google.maps.SymbolPath.CIRCLE
-        },
-        label: {
-            text: `${waypoint.waypoint_id}`,
-            color: '#ffffff',
-            fontSize: '12px',
-            fontWeight: '700'
-        },
-        labelOrigin: new google.maps.Point(0, 1),
-        draggable: true
-    });
+    const element = document.createElement('div');
+    element.className = 'map-waypoint-marker';
+    element.textContent = String(waypoint.waypoint_id);
+    element.title = `WP ${waypoint.waypoint_id}: ${waypoint.actions.length} actions`;
+    element.setAttribute('aria-label', element.title);
 
-    marker.addListener('dragend', (event) => {
-        waypoint.lat = event.latLng.lat();
-        waypoint.lon = event.latLng.lng();
+    const marker = new maplibregl.Marker({ element, anchor: 'center', draggable: true })
+        .setLngLat([waypoint.lon, waypoint.lat])
+        .addTo(map);
+
+    marker.on('dragend', () => {
+        const position = marker.getLngLat();
+        waypoint.lat = position.lat;
+        waypoint.lon = position.lng;
         updateWaypoint(waypoint);
     });
 
@@ -605,7 +571,7 @@ function redoMission() {
 }
 
 function addWaypoint(latLng) {
-    const payload = { lat: latLng.lat(), lon: latLng.lng() };
+    const payload = { lat: latLng.lat, lon: latLng.lng };
 
     postJson('/add_waypoint', payload)
         .then((response) => ensureOk(response, 'Failed to add waypoint on server.'))
@@ -620,7 +586,7 @@ function addWaypoint(latLng) {
 }
 
 function addWaypointAt(latLng, index) {
-    const payload = { lat: latLng.lat(), lon: latLng.lng(), index };
+    const payload = { lat: latLng.lat, lon: latLng.lng, index };
 
     postJson('/add_waypoint_at', payload)
         .then((response) => ensureOk(response, 'Failed to add waypoint on server.'))
